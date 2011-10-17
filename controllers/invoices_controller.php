@@ -1,0 +1,263 @@
+<?php
+class InvoicesController extends AppController {
+
+	var $name = 'Invoices';
+	var $order = array('number', 'due_date');
+
+	function index($status = array('unpaid', 'partpaid')) {
+		$this->paginate = array(
+			'conditions' => array(
+				'Invoice.status' => $status,
+				),
+			'fields' => array(
+				'id',
+				'name',
+				'status',
+				'total',
+				'balance',
+				'due_date',
+				),
+			'limit' => 10,
+			'order' => array(
+				'created DESC',
+				),
+			);
+		$this->set('invoices', $this->paginate());
+		
+		$this->set('displayName', 'name');
+		$this->set('displayDescription', ''); 
+		$pageActions = array(array(
+			'linkText' => 'Add Invoice',
+			'linkUrl' => array(
+				'plugin' => 'invoices',
+				'controller' => 'invoices',
+				'action' => 'add',
+				),
+			),array(
+			'linkText' => 'Paid Invoices',
+			'linkUrl' => array(
+				'plugin' => 'invoices',
+				'controller' => 'invoices',
+				'action' => 'index',
+				'paid',
+				),
+			),array(
+			'linkText' => 'Generate Invoice',
+			'linkUrl' => array(
+				'plugin' => 'invoices',
+				'controller' => 'invoices',
+				'action' => 'generate',
+				),
+			));
+		$this->set(compact('pageActions')); 
+	}
+
+	function view($id = null) {
+		$invoice = $this->Invoice->find('first', array(
+			'contain' => array(
+				'InvoiceTime',
+				'InvoiceItem',
+				),
+			'conditions' => array(
+				'Invoice.id' => $id
+				)
+			)
+		);
+		
+		if (!empty($invoice)) {
+			$this->set(compact('invoice', 'trackedHoursSum', 'percentComplete'));
+		} else {
+			$this->Session->setFlash(__('Invalid Invoice.', true));
+			$this->redirect(array('action' => 'index'));
+		}
+		$this->set('title_for_layout',  strip_tags($invoice['Invoice']['name']));
+	}
+
+	function add() {
+		if (!empty($this->data)) {
+			try {
+				$this->Invoice->add($this->data);
+				$this->Session->setFlash(__('The invoice has been saved', true));
+				$this->redirect(array('action' => 'view', $this->Invoice->id));
+			} catch(Exception $e) {
+				$this->Session->setFlash($e->getMessage());
+			}
+		}
+		
+		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
+		$invoiceNumber = $this->_generateInvoiceNumber();
+		$dueDate = date('Y-m-d');
+		$defaultIntroduction = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
+		$defaultConclusion = defined('__INVOICES_DEFAULT_CONCLUSION') ? __INVOICES_DEFAULT_CONCLUSION : '';
+		$this->set(compact('contacts', 'invoiceNumber', 'dueDate', 'defaultIntroduction', 'defaultConclusion'));
+	}
+
+	function edit($id = null) {
+		if (!$id && empty($this->data)) {
+			$this->Session->setFlash(__('Invalid invoice', true));
+			$this->redirect(array('action' => 'index'));
+		}
+		if (!empty($this->data)) {
+			try {
+				$this->Invoice->add($this->data);
+				$this->Session->setFlash(__('The invoice has been saved', true));
+				$this->redirect(array('action' => 'view', $this->Invoice->id));
+			} catch(Exception $e) {
+				$this->Session->setFlash($e->getMessage());
+			}
+		}
+		if (empty($this->data)) {
+			$this->Invoice->contain(array('InvoiceTime', 'InvoiceItem'));
+			$this->data = $this->Invoice->read(null, $id);
+			$this->data['Invoice']['balance'] = !empty($this->data['Invoice']['balance']) ? formatPrice($this->data['Invoice']['balance']) : null;
+		}
+		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
+		$this->set(compact('contacts'));
+	}
+
+	function delete($id = null) {
+		if (!$id) {
+			$this->Session->setFlash(__('Invalid id for invoice', true));
+			$this->redirect(array('action'=>'index'));
+		}
+		if ($this->Invoice->delete($id)) {
+			$this->Session->setFlash(__('Invoice deleted', true));
+			$this->redirect(array('action'=>'index'));
+		}
+		$this->Session->setFlash(__('Invoice was not deleted', true));
+		$this->redirect(array('action' => 'index'));
+	}
+
+
+	/** 
+	 * Generate an invoice from data gathered in another plugin
+	 * 
+	 * @param {string}		The plugin identifier generating the plugin
+	 */
+	function generate($type = 'project') {
+		if (!empty($this->data)) :
+			$projectIds = array_values(array_filter($this->data['Invoice']['project_id'])); //reindex & filter zero values
+			$project = $this->Invoice->Project->find('first', array('conditions' => array('Project.id' => $projectIds[0])));
+			$conditions['TimesheetTime.project_id'] = $projectIds;
+			$conditions['TimesheetTime.started_on >='] = !empty($this->data['Invoice']['start_date']) ? $this->data['Invoice']['start_date'] : '0000-00-00 00:00:00';
+			$conditions['TimesheetTime.started_on <='] = !empty($this->data['Invoice']['end_date']) ? date('Y-m-d 99:99:99', strtotime($this->data['Invoice']['end_date'])) : '9999-99-99 99:99:99';
+			$times = $this->Invoice->Project->TimesheetTime->find('all', array(
+				'conditions' => $conditions,
+				'contain' => array(
+					'Task',
+					'ProjectIssue',
+					),
+				'order' => array(
+					'TimesheetTime.created DESC',
+					),
+				));
+			
+			$data['Invoice']['name'] = strip_tags($project['Project']['displayName']) . ' ' . $this->_generateInvoiceNumber();
+			$data['Invoice']['number'] = $this->_generateInvoiceNumber();
+			$data['Invoice']['status'] = 'unpaid';
+			$data['Invoice']['introduction'] = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
+			$data['Invoice']['conclusion'] = defined('__INVOICES_DEFAULT_CONCLUSION') ? __INVOICES_DEFAULT_CONCLUSION : '';
+			$data['Invoice']['due_date'] = date('Y-m-d');
+			$data['Invoice']['contact_id'] = $this->data['Invoice']['contact_id'];
+			$data['Invoice']['project_id'] = $projectIds[0]; // didn't think ahead for having an invoice relate to multiple projects (but I really don't want to create another new habtm db table in order to just relate invoices to projects)
+			$rate = defined('__INVOICES_DEFAULT_RATE') ? __INVOICES_DEFAULT_RATE : '0';
+			$rate = !empty($this->data['Invoice']['rate']) ? $this->data['Invoice']['rate'] : '0'; // over write default if provided
+			
+			$i=0; $total=0; foreach ($times as $invTime) :
+				$data['InvoiceTime'][$i]['name'] = !empty($invTime['Task']['name']) ? $invTime['Task']['name'] : $invTime['ProjectIssue']['name'];  // support the deprecated project_issues table
+				$data['InvoiceTime'][$i]['notes'] = date('M j, Y', strtotime($invTime['TimesheetTime']['created'])) . ', ' .$invTime['TimesheetTime']['comments'];
+				$data['InvoiceTime'][$i]['rate'] = $rate;
+				$data['InvoiceTime'][$i]['hours'] = $invTime['TimesheetTime']['hours'];
+				$data['InvoiceTime'][$i]['project_id'] = $projectIds[0];
+				$data['InvoiceTime'][$i]['task_id'] = $invTime['Task']['id'];
+				$data['InvoiceTime'][$i]['time_id'] = $invTime['TimesheetTime']['id'];
+				$lineTotal = $rate * $invTime['TimesheetTime']['hours'];
+				$total =  $total + $lineTotal;
+				$i++;
+			endforeach;
+			$data['Invoice']['total'] = $total;
+			$data['Invoice']['balance'] = $total;
+						
+			if ($this->Invoice->add($data)) : 
+				$this->Session->setFlash(__('Invoice generated', true));
+				$this->redirect(array('action' => 'edit', $this->Invoice->id));
+			else : 
+				$this->Session->setFlash(__('Invoice generation failed.', true));
+			endif;
+		endif;
+		
+		if ($type == 'timesheet') :
+			$this->set('element', 'generate/timesheet');
+		else : 
+			$contacts = $this->Invoice->Project->findContactsWithProjects('list');
+			$projects = $this->Invoice->Project->find('all', array(
+				'contain' => array(
+					'Invoice' => array(
+						'order' => 'created',
+						'limit' => 1,
+						),
+					),
+				));
+			$this->set(compact('contacts', 'projects'));
+			$this->set('element', 'generate/project');
+		endif;		
+	}
+	
+	
+	/**
+	 * Find all the email address associated with an invoice, and list them in an editable page before sending.
+	 *
+	 * @param {int}		The invoice id
+	 */
+	function email($id = null) {
+		if (!empty($id) || !empty($this->data['Invoice']['id'])) {
+			$id = !empty($id) ? $id : $this->data['Invoice']['id'];
+			$invoice = $this->Invoice->find('first', array(
+				'conditions' => array(
+					'Invoice.id' => $id,
+					),
+				'contain' => array(
+					'Contact' => array(
+						'Employee' => array(
+							'User',
+							),
+						),
+					'Creator',
+					),
+				));
+			if (!empty($invoice['Contact']['Employee'][0])) : 
+				foreach ($invoice['Contact']['Employee'] as $employee) :
+					$recipients[] = $employee['User']['email'];
+				endforeach;
+			endif;
+			
+			if (!empty($invoice['Creator']['email'])) :
+				$recipients[] = $invoice['Creator']['email'];
+			endif;
+			
+			$this->set('invoice', $invoice);
+			$this->set('recipients', implode(PHP_EOL, $recipients));
+		}
+		if (!empty($this->data['Invoice']['recipient'])) :
+			$recipients = explode(PHP_EOL, $this->data['Invoice']['recipient']);
+			foreach ($recipients as $recipient) :
+				$url = 'http://' . $_SERVER['HTTP_HOST'] . '/invoices/invoices/view/' . $invoice['Invoice']['id'];
+				$message = '<p>You have a new invoice: <a href="'.$url.'">'.$url.'</a></p>';
+				$this->__sendMail(trim($recipient), 'Invoice : ' . $invoice['Invoice']['name'], $message, $template = 'default');
+			endforeach;
+			$invoice['Invoice']['is_sent'] = $invoice['Invoice']['is_sent'] + 1;
+			if ($this->Invoice->save($invoice)) : 
+				$this->Session->setFlash(__('Invoice Emailed', true));
+				$this->redirect(array('action' => 'view', $invoice['Invoice']['id']));
+			else : 
+				$this->Session->setFlash(__('Mail probably sent but invoice sent count not updated.', true));
+				$this->redirect(array('action' => 'view', $invoice['Invoice']['id']));
+			endif;
+		endif;
+	}
+	
+	function _generateInvoiceNumber() {
+		return str_pad($this->Invoice->find('count') + 1, 7, '0', STR_PAD_LEFT);
+	}
+}
+?>
