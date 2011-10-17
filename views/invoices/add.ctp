@@ -1,4 +1,4 @@
-<div class="invoice form"> <?php echo $form->create('Invoice');?>
+<div class="invoice form"> <?php echo $this->Form->create('Invoice');?>
   <fieldset>
     <legend>
     <p>New Invoice</p>
@@ -7,9 +7,9 @@
 		echo $this->Form->hidden('Invoice.status', array('value' => 'unpaid'));
 		echo $this->Form->hidden('Invoice.project_id');
 		if (!empty($this->params['named']['contact_id'])) {
-			echo $form->input('Invoice.contact_id', array('type' => 'hidden', 'value' => $this->params['named']['contact_id']));
+			echo $this->Form->input('Invoice.contact_id', array('type' => 'hidden', 'value' => $this->params['named']['contact_id']));
 		} else {
-			echo $form->input('Invoice.contact_id', array('empty' => '-- Optional --', 'label' => 'Which client? <small>(or '.$this->Html->link('create a new company', array('plugin' => 'contacts', 'controller' => 'contacts', 'controller' => 'contacts', 'action' => 'add', 'company')).')</small>', 'after' => '<br /><br /><br />'.$form->checkbox('Invoice.contact_all_access', array('checked' => 'checked')).' Give everyone at this company access to this invoice?'));
+			echo $this->Form->input('Invoice.contact_id', array('empty' => '-- Optional --', 'label' => 'Which client? <small>(or '.$this->Html->link('create a new company', array('plugin' => 'contacts', 'controller' => 'contacts', 'controller' => 'contacts', 'action' => 'add', 'company')).')</small>', 'after' => '<br /><br /><br />'.$this->Form->checkbox('Invoice.contact_all_access', array('checked' => 'checked')).' Give everyone at this company access to this invoice?'));
 		}
 		echo $this->Form->input('Invoice.number', array('value' => $invoiceNumber, 'label' => 'Invoice Number'));
 		#echo $this->Form->input('Invoice.po_number', array('label' => 'PO Number'));
@@ -71,10 +71,10 @@
 		echo $this->Form->input('Invoice.conclusion', array('value' => $defaultConclusion, 'label' => 'Terms'));
 	?>
   </fieldset>
-  <?php echo $form->end('Submit');?> </div>
+  <?php echo $this->Form->end('Submit');?> </div>
 <?php 
 // set the contextual menu items
-$menu->setValue(array(
+$this->Menu->setValue(array(
 	array(
 		'heading' => 'Invoices',
 		'items' => array(

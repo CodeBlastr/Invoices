@@ -73,7 +73,7 @@
         <div id="invoicePayButton"> <a href="https://www.razorit.com/checkout/?a=<?php echo formatPrice($invoice['Invoice']['balance']); ?>" class="button">Enter Payment on Invoice</a> </div>
         <!-- ARPAN, THIS IS THE PART I NEED COMPLETED -->
         <!--div class="invoicePay form">
-			<?php echo $form->create('Invoice', array('url' => array('action' => 'pay')));?>
+			<?php echo $this->Form->create('Invoice', array('url' => array('action' => 'pay')));?>
             <?php echo $this->Form->hidden('Invoice.id', array('value' => $invoice['Invoice']['id'])); ?>
             <?php echo $this->Form->end('Enter Payment On Invoice'); ?>
         </div-->
@@ -84,7 +84,7 @@
 </div>
 <?php
 // set the contextual menu items
-$menu->setValue(array(
+$this->Menu->setValue(array(
 	array(
 		'heading' => 'Invoice',
 		'items' => array(
