@@ -17,9 +17,9 @@ class InvoiceTimesController extends AppController {
 	}
 
 	function add() {
-		if (!empty($this->data)) {
+		if (!empty($this->request->data)) {
 			$this->InvoiceTime->create();
-			if ($this->InvoiceTime->save($this->data)) {
+			if ($this->InvoiceTime->save($this->request->data)) {
 				$this->Session->setFlash(__('The invoice time has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
@@ -34,20 +34,20 @@ class InvoiceTimesController extends AppController {
 	}
 
 	function edit($id = null) {
-		if (!$id && empty($this->data)) {
+		if (!$id && empty($this->request->data)) {
 			$this->Session->setFlash(__('Invalid invoice time', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		if (!empty($this->data)) {
-			if ($this->InvoiceTime->save($this->data)) {
+		if (!empty($this->request->data)) {
+			if ($this->InvoiceTime->save($this->request->data)) {
 				$this->Session->setFlash(__('The invoice time has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
 				$this->Session->setFlash(__('The invoice time could not be saved. Please, try again.', true));
 			}
 		}
-		if (empty($this->data)) {
-			$this->data = $this->InvoiceTime->read(null, $id);
+		if (empty($this->request->data)) {
+			$this->request->data = $this->InvoiceTime->read(null, $id);
 		}
 		$projects = $this->InvoiceTime->Project->find('list');
 		$tasks = $this->InvoiceTime->Task->find('list');

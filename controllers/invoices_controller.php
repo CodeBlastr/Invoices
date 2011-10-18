@@ -74,9 +74,9 @@ class InvoicesController extends AppController {
 	}
 
 	function add() {
-		if (!empty($this->data)) {
+		if (!empty($this->request->data)) {
 			try {
-				$this->Invoice->add($this->data);
+				$this->Invoice->add($this->request->data);
 				$this->Session->setFlash(__('The invoice has been saved', true));
 				$this->redirect(array('action' => 'view', $this->Invoice->id));
 			} catch(Exception $e) {
@@ -93,23 +93,23 @@ class InvoicesController extends AppController {
 	}
 
 	function edit($id = null) {
-		if (!$id && empty($this->data)) {
+		if (!$id && empty($this->request->data)) {
 			$this->Session->setFlash(__('Invalid invoice', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		if (!empty($this->data)) {
+		if (!empty($this->request->data)) {
 			try {
-				$this->Invoice->add($this->data);
+				$this->Invoice->add($this->request->data);
 				$this->Session->setFlash(__('The invoice has been saved', true));
 				$this->redirect(array('action' => 'view', $this->Invoice->id));
 			} catch(Exception $e) {
 				$this->Session->setFlash($e->getMessage());
 			}
 		}
-		if (empty($this->data)) {
+		if (empty($this->request->data)) {
 			$this->Invoice->contain(array('InvoiceTime', 'InvoiceItem'));
-			$this->data = $this->Invoice->read(null, $id);
-			$this->data['Invoice']['balance'] = !empty($this->data['Invoice']['balance']) ? formatPrice($this->data['Invoice']['balance']) : null;
+			$this->request->data = $this->Invoice->read(null, $id);
+			$this->request->data['Invoice']['balance'] = !empty($this->request->data['Invoice']['balance']) ? formatPrice($this->request->data['Invoice']['balance']) : null;
 		}
 		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
 		$this->set(compact('contacts'));
@@ -135,12 +135,12 @@ class InvoicesController extends AppController {
 	 * @param {string}		The plugin identifier generating the plugin
 	 */
 	function generate($type = 'project') {
-		if (!empty($this->data)) :
-			$projectIds = array_values(array_filter($this->data['Invoice']['project_id'])); //reindex & filter zero values
+		if (!empty($this->request->data)) :
+			$projectIds = array_values(array_filter($this->request->data['Invoice']['project_id'])); //reindex & filter zero values
 			$project = $this->Invoice->Project->find('first', array('conditions' => array('Project.id' => $projectIds[0])));
 			$conditions['TimesheetTime.project_id'] = $projectIds;
-			$conditions['TimesheetTime.started_on >='] = !empty($this->data['Invoice']['start_date']) ? $this->data['Invoice']['start_date'] : '0000-00-00 00:00:00';
-			$conditions['TimesheetTime.started_on <='] = !empty($this->data['Invoice']['end_date']) ? date('Y-m-d 99:99:99', strtotime($this->data['Invoice']['end_date'])) : '9999-99-99 99:99:99';
+			$conditions['TimesheetTime.started_on >='] = !empty($this->request->data['Invoice']['start_date']) ? $this->request->data['Invoice']['start_date'] : '0000-00-00 00:00:00';
+			$conditions['TimesheetTime.started_on <='] = !empty($this->request->data['Invoice']['end_date']) ? date('Y-m-d 99:99:99', strtotime($this->request->data['Invoice']['end_date'])) : '9999-99-99 99:99:99';
 			$times = $this->Invoice->Project->TimesheetTime->find('all', array(
 				'conditions' => $conditions,
 				'contain' => array(
@@ -158,10 +158,10 @@ class InvoicesController extends AppController {
 			$data['Invoice']['introduction'] = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
 			$data['Invoice']['conclusion'] = defined('__INVOICES_DEFAULT_CONCLUSION') ? __INVOICES_DEFAULT_CONCLUSION : '';
 			$data['Invoice']['due_date'] = date('Y-m-d');
-			$data['Invoice']['contact_id'] = $this->data['Invoice']['contact_id'];
+			$data['Invoice']['contact_id'] = $this->request->data['Invoice']['contact_id'];
 			$data['Invoice']['project_id'] = $projectIds[0]; // didn't think ahead for having an invoice relate to multiple projects (but I really don't want to create another new habtm db table in order to just relate invoices to projects)
 			$rate = defined('__INVOICES_DEFAULT_RATE') ? __INVOICES_DEFAULT_RATE : '0';
-			$rate = !empty($this->data['Invoice']['rate']) ? $this->data['Invoice']['rate'] : '0'; // over write default if provided
+			$rate = !empty($this->request->data['Invoice']['rate']) ? $this->request->data['Invoice']['rate'] : '0'; // over write default if provided
 			
 			$i=0; $total=0; foreach ($times as $invTime) :
 				$data['InvoiceTime'][$i]['name'] = !empty($invTime['Task']['name']) ? $invTime['Task']['name'] : $invTime['ProjectIssue']['name'];  // support the deprecated project_issues table
@@ -210,8 +210,8 @@ class InvoicesController extends AppController {
 	 * @param {int}		The invoice id
 	 */
 	function email($id = null) {
-		if (!empty($id) || !empty($this->data['Invoice']['id'])) {
-			$id = !empty($id) ? $id : $this->data['Invoice']['id'];
+		if (!empty($id) || !empty($this->request->data['Invoice']['id'])) {
+			$id = !empty($id) ? $id : $this->request->data['Invoice']['id'];
 			$invoice = $this->Invoice->find('first', array(
 				'conditions' => array(
 					'Invoice.id' => $id,
@@ -238,8 +238,8 @@ class InvoicesController extends AppController {
 			$this->set('invoice', $invoice);
 			$this->set('recipients', implode(PHP_EOL, $recipients));
 		}
-		if (!empty($this->data['Invoice']['recipient'])) :
-			$recipients = explode(PHP_EOL, $this->data['Invoice']['recipient']);
+		if (!empty($this->request->data['Invoice']['recipient'])) :
+			$recipients = explode(PHP_EOL, $this->request->data['Invoice']['recipient']);
 			foreach ($recipients as $recipient) :
 				$url = 'http://' . $_SERVER['HTTP_HOST'] . '/invoices/invoices/view/' . $invoice['Invoice']['id'];
 				$message = '<p>You have a new invoice: <a href="'.$url.'">'.$url.'</a></p>';

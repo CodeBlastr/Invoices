@@ -26,9 +26,9 @@
       <th>Hours</th>
       <th>Line Total</th>
     </tr>
-    <?php $i=0; if(!empty($this->data['InvoiceTime'][0])) : ?>
+    <?php $i=0; if(!empty($this->request->data['InvoiceTime'][0])) : ?>
     <tbody class="invoiceTimes">
-      <?php foreach($this->data['InvoiceTime'] as $invoiceTime): ?>
+      <?php foreach($this->request->data['InvoiceTime'] as $invoiceTime): ?>
       <tr id="line<?php echo $i; ?>Time" class="invoiceTimeLine timeRow">
 	    <?php echo $this->Form->hidden('InvoiceTime.'.$i.'.id'); ?>
 	    <?php echo $this->Form->hidden('InvoiceTime.'.$i.'.project_id'); ?>
@@ -68,9 +68,9 @@
       <th>Qty</th>
       <th>Line Total</th>
     </tr>
-    <?php $i=0; if(!empty($this->data['InvoiceItem'][0])) : ?>
+    <?php $i=0; if(!empty($this->request->data['InvoiceItem'][0])) : ?>
     <tbody class="invoiceItems">
-      <?php foreach($this->data['InvoiceItem'] as $invoiceTime): ?>
+      <?php foreach($this->request->data['InvoiceItem'] as $invoiceTime): ?>
       <tr id="line<?php echo $i; ?>Item" class="invoiceItemLine itemRow">
 	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.id'); ?>
 	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.catalog_item_id'); ?>
@@ -119,10 +119,10 @@ echo $this->Element('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoices',
 		'items' => array(
-			$this->Html->link(__('View Invoice', true), array('controller' => 'invoices', 'action' => 'view', $this->data['Invoice']['id'])),
+			$this->Html->link(__('View Invoice', true), array('controller' => 'invoices', 'action' => 'view', $this->request->data['Invoice']['id'])),
 			$this->Html->link(__('List Invoices', true), array('controller' => 'invoices', 'action' => 'index')),
 			$this->Html->link(__('New Invoice', true), array('controller' => 'invoices', 'action' => 'add')),
-			$this->Html->link(__('Delete Invoice', true), array('controller' => 'invoices', 'action' => 'delete', $this->data['Invoice']['id'])),
+			$this->Html->link(__('Delete Invoice', true), array('controller' => 'invoices', 'action' => 'delete', $this->request->data['Invoice']['id'])),
 			)
 		),
 	)));

@@ -17,9 +17,9 @@ class InvoiceItemsController extends AppController {
 	}
 
 	function add() {
-		if (!empty($this->data)) {
+		if (!empty($this->request->data)) {
 			$this->InvoiceItem->create();
-			if ($this->InvoiceItem->save($this->data)) {
+			if ($this->InvoiceItem->save($this->request->data)) {
 				$this->Session->setFlash(__('The invoice item has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
@@ -32,20 +32,20 @@ class InvoiceItemsController extends AppController {
 	}
 
 	function edit($id = null) {
-		if (!$id && empty($this->data)) {
+		if (!$id && empty($this->request->data)) {
 			$this->Session->setFlash(__('Invalid invoice item', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		if (!empty($this->data)) {
-			if ($this->InvoiceItem->save($this->data)) {
+		if (!empty($this->request->data)) {
+			if ($this->InvoiceItem->save($this->request->data)) {
 				$this->Session->setFlash(__('The invoice item has been saved', true));
 				$this->redirect(array('action' => 'index'));
 			} else {
 				$this->Session->setFlash(__('The invoice item could not be saved. Please, try again.', true));
 			}
 		}
-		if (empty($this->data)) {
-			$this->data = $this->InvoiceItem->read(null, $id);
+		if (empty($this->request->data)) {
+			$this->request->data = $this->InvoiceItem->read(null, $id);
 		}
 		$invoices = $this->InvoiceItem->Invoice->find('list');
 		$catalogItems = $this->InvoiceItem->CatalogItem->find('list');
