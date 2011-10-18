@@ -84,7 +84,7 @@
 </div>
 <?php
 // set the contextual menu items
-$this->Menu->setValue(array(
+echo $this->Element('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoice',
 		'items' => array(
@@ -95,7 +95,6 @@ $this->Menu->setValue(array(
 			$this->Html->link(__('Delete Invoice', true), array('controller' => 'invoices', 'action' => 'delete', $invoice['Invoice']['id']), array(), 'Are you sure you want to delete "'.strip_tags($invoice['Invoice']['name']).'"'),
 			)
 		),
-	)
-); 
+	))); 
 ?>
 <?php $this->set('page_title_for_layout', $invoice['Invoice']['name']); ?>

@@ -76,7 +76,7 @@
 </div>
 <?php
 // set the contextual menu items
-$this->Menu->setValue(array(
+echo $this->Element('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoice',
 		'items' => array(
@@ -86,7 +86,6 @@ $this->Menu->setValue(array(
 			$this->Html->link(__('Email Invoice', true), array('controller' => 'invoices', 'action' => 'email', $invoice['Invoice']['id'])),
 			)
 		),
-	)
-); 
+	))); 
 ?>
 <?php $this->set('page_title_for_layout', $invoice['Invoice']['name']); ?>

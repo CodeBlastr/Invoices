@@ -74,14 +74,14 @@
   <?php echo $this->Form->end('Submit');?> </div>
 <?php 
 // set the contextual menu items
-$this->Menu->setValue(array(
+echo $this->Element('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoices',
 		'items' => array(
 			$this->Html->link(__('List Invoices', true), array('controller' => 'invoices', 'action' => 'index')),
-		)
-	),
-));
+			)
+		),
+	)));
 ?>
 <?php echo $this->Html->script('/js/jquery.formmodifier.js');?>
 <?php echo $this->Html->script('/invoices/invoice.js');?>
