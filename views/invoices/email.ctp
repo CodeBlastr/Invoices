@@ -3,16 +3,16 @@
     <div class="viewRow">
       <ul class="metaData">
         <li><span class="metaDataLabel">
-          <?php __('Invoice Number: '); ?>
+          <?php echo __('Invoice Number: '); ?>
           </span><span class="metaDataDetail"><?php echo $invoice['Invoice']['number']; ?></span></li>
         <li><span class="metaDataLabel">
-          <?php __('Status: '); ?>
+          <?php echo __('Status: '); ?>
           </span><span class="metaDataDetail"><?php echo $invoice['Invoice']['status']; ?></span></li>
         <li><span class="metaDataLabel">
-          <?php __('Date: '); ?>
+          <?php echo __('Date: '); ?>
           </span><span class="metaDataDetail"><?php echo $invoice['Invoice']['due_date']; ?></span></li>
         <li><span class="metaDataLabel">
-          <?php __('Sent Count: '); ?>
+          <?php echo __('Sent Count: '); ?>
           </span><span class="metaDataDetail"><?php echo $invoice['Invoice']['is_sent']; ?></span></li>
       </ul>
       <div class="recordData">

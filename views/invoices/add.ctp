@@ -64,7 +64,7 @@
   </div>
   <fieldset>
     <legend>
-    <?php __('Notes &amp; Terms'); ?>
+    <?php echo __('Notes &amp; Terms'); ?>
     </legend>
     <?php
 		echo $this->Form->input('Invoice.introduction', array('value' => $defaultIntroduction, 'label' => 'Notes to client'));
