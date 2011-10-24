@@ -259,5 +259,8 @@ class InvoicesController extends AppController {
 	function _generateInvoiceNumber() {
 		return str_pad($this->Invoice->find('count') + 1, 7, '0', STR_PAD_LEFT);
 	}
+	
+	function dashboard() {
+	}
 }
 ?>
