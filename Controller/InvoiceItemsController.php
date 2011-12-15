@@ -1,7 +1,8 @@
 <?php
 class InvoiceItemsController extends AppController {
 
-	var $name = 'InvoiceItems';
+	public $name = 'InvoiceItems';
+	public $uses = 'Invoices.InvoiceItem';
 
 	function index() {
 		$this->InvoiceItem->recursive = 0;

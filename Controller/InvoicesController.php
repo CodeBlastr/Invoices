@@ -1,8 +1,9 @@
 <?php
 class InvoicesController extends AppController {
 
-	var $name = 'Invoices';
-	var $order = array('number', 'due_date');
+	public $name = 'Invoices';
+	public $uses = 'Invoices.Invoice';
+	public $order = array('number', 'due_date');
 
 	function index($status = array('unpaid', 'partpaid')) {
 		$this->paginate = array(
