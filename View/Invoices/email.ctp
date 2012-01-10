@@ -31,7 +31,7 @@
             <td><?php echo $invoiceTime['notes']; ?></td>
             <td><?php echo $invoiceTime['rate']; ?></td>
             <td><?php echo $invoiceTime['hours']; ?></td>
-            <td><?php echo formatPrice($invoiceTime['rate'] * $invoiceTime['hours']); ?></td>
+            <td><?php echo ZuhaInflector::pricify($invoiceTime['rate'] * $invoiceTime['hours']); ?></td>
           </tr>
           <?php endforeach; endif; ?>
           <?php if (!empty($invoice['InvoiceItem'][0])) : ?>
@@ -48,7 +48,7 @@
             <td><?php echo $invoiceItem['description']; ?></td>
             <td><?php echo $invoiceItem['unit_cost']; ?></td>
             <td><?php echo $invoiceItem['quantity']; ?></td>
-            <td><?php echo formatPrice($invoiceItem['unit_cost'] * $invoiceItem['quantity']); ?></td>
+            <td><?php echo ZuhaInflector::pricify($invoiceItem['unit_cost'] * $invoiceItem['quantity']); ?></td>
           </tr>
           <?php endforeach; endif; ?>
           <tr id="totals">
@@ -58,9 +58,9 @@
               <p>Paid</p>
               <p>Balance</p></td>
             <td>&nbsp;</td>
-            <td><p><?php echo formatPrice($invoice['Invoice']['total']); ?></p>
-              <p><?php echo formatPrice($invoice['Invoice']['total'] - $invoice['Invoice']['total']); ?></p>
-              <p><?php echo formatPrice($invoice['Invoice']['balance']); ?></p></td>
+            <td><p><?php echo ZuhaInflector::pricify($invoice['Invoice']['total']); ?></p>
+              <p><?php echo ZuhaInflector::pricify($invoice['Invoice']['total'] - $invoice['Invoice']['total']); ?></p>
+              <p><?php echo ZuhaInflector::pricify($invoice['Invoice']['balance']); ?></p></td>
           </tr>
         </table>
         <div class="invoiceEmail form">
