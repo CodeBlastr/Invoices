@@ -110,7 +110,7 @@ class InvoicesController extends AppController {
 		if (empty($this->request->data)) {
 			$this->Invoice->contain(array('InvoiceTime', 'InvoiceItem'));
 			$this->request->data = $this->Invoice->read(null, $id);
-			$this->request->data['Invoice']['balance'] = !empty($this->request->data['Invoice']['balance']) ? formatPrice($this->request->data['Invoice']['balance']) : null;
+			$this->request->data['Invoice']['balance'] = !empty($this->request->data['Invoice']['balance']) ? ZuhaInflector::pricify($this->request->data['Invoice']['balance']) : null;
 		}
 		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
 		$this->set(compact('contacts'));
