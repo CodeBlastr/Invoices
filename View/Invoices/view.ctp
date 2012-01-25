@@ -70,7 +70,6 @@
               <p><?php echo ZuhaInflector::pricify($invoice['Invoice']['balance']); ?></p></td>
           </tr>
         </table>
-        <div id="invoicePayButton"> <a href="https://www.razorit.com/checkout/?a=<?php echo ZuhaInflector::pricify($invoice['Invoice']['balance']); ?>" class="button">Enter Payment on Invoice</a> </div>
         <!-- ARPAN, THIS IS THE PART I NEED COMPLETED -->
         <!--div class="invoicePay form">
 			<?php echo $this->Form->create('Invoice', array('url' => array('action' => 'pay')));?>
@@ -78,6 +77,7 @@
             <?php echo $this->Form->end('Enter Payment On Invoice'); ?>
         </div-->
       </div>
+        <div id="invoicePayButton"> <a href="https://www.razorit.com/checkout/?a=<?php echo ZuhaInflector::pricify($invoice['Invoice']['balance']); ?>" class="button">Enter Payment on Invoice</a> </div>
     </div>
   </div>
   <!-- /info-block end -->
@@ -88,11 +88,11 @@ $this->set('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoice',
 		'items' => array(
-			$this->Html->link(__('New Invoice', true), array('controller' => 'invoices', 'action' => 'add')),
-			$this->Html->link(__('List Invoices', true), array('controller' => 'invoices', 'action' => 'index')),
-			$this->Html->link(__('Edit Invoice', true), array('controller' => 'invoices', 'action' => 'edit', $invoice['Invoice']['id'])),
-			$this->Html->link(__('Email Invoice', true), array('controller' => 'invoices', 'action' => 'email', $invoice['Invoice']['id'])),
-			$this->Html->link(__('Delete Invoice', true), array('controller' => 'invoices', 'action' => 'delete', $invoice['Invoice']['id']), array(), 'Are you sure you want to delete "'.strip_tags($invoice['Invoice']['name']).'"'),
+			$this->Html->link(__('Add', true), array('controller' => 'invoices', 'action' => 'add'), array('class' => 'add')),
+			$this->Html->link(__('List', true), array('controller' => 'invoices', 'action' => 'index'), array('class' => 'index')),
+			$this->Html->link(__('Edit', true), array('controller' => 'invoices', 'action' => 'edit', $invoice['Invoice']['id']), array('class' => 'edit')),
+			$this->Html->link(__('Email', true), array('controller' => 'invoices', 'action' => 'email', $invoice['Invoice']['id'])),
+			$this->Html->link(__('Delete', true), array('controller' => 'invoices', 'action' => 'delete', $invoice['Invoice']['id']), array('class' => 'delete'), 'Are you sure you want to delete "'.strip_tags($invoice['Invoice']['name']).'"'),
 			)
 		),
 	))); 
