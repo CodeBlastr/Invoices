@@ -125,7 +125,6 @@ $this->set('context_menu', array('menus' => array(
 			$this->Html->link(__('Delete Invoice', true), array('controller' => 'invoices', 'action' => 'delete', $this->request->data['Invoice']['id'])),
 			)
 		),
-	)));
-?>
+	))); ?>
 <?php echo $this->Html->script('/js/jquery.formmodifier.js');?>
 <?php echo $this->Html->script('/invoices/invoice.js');?>
