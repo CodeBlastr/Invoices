@@ -28,14 +28,14 @@ class InvoicesController extends AppController {
 		$this->set('displayName', 'name');
 		$this->set('displayDescription', ''); 
 		$pageActions = array(array(
-			'linkText' => 'Add Invoice',
+			'linkText' => 'Add',
 			'linkUrl' => array(
 				'plugin' => 'invoices',
 				'controller' => 'invoices',
 				'action' => 'add',
 				),
 			),array(
-			'linkText' => 'Paid Invoices',
+			'linkText' => 'Paid',
 			'linkUrl' => array(
 				'plugin' => 'invoices',
 				'controller' => 'invoices',
@@ -43,7 +43,7 @@ class InvoicesController extends AppController {
 				'paid',
 				),
 			),array(
-			'linkText' => 'Generate Invoice',
+			'linkText' => 'Generate',
 			'linkUrl' => array(
 				'plugin' => 'invoices',
 				'controller' => 'invoices',
@@ -211,50 +211,60 @@ class InvoicesController extends AppController {
 	 * @param {int}		The invoice id
 	 */
 	function email($id = null) {
-		if (!empty($id) || !empty($this->request->data['Invoice']['id'])) {
-			$id = !empty($id) ? $id : $this->request->data['Invoice']['id'];
-			$invoice = $this->Invoice->find('first', array(
-				'conditions' => array(
-					'Invoice.id' => $id,
-					),
-				'contain' => array(
-					'Contact' => array(
-						'Employee' => array(
-							'User',
-							),
-						),
-					'Creator',
-					),
-				));
-			if (!empty($invoice['Contact']['Employee'][0])) : 
-				foreach ($invoice['Contact']['Employee'] as $employee) :
-					$recipients[] = $employee['User']['email'];
-				endforeach;
-			endif;
-			
-			if (!empty($invoice['Creator']['email'])) :
-				$recipients[] = $invoice['Creator']['email'];
-			endif;
-			
-			$this->set('invoice', $invoice);
-			$this->set('recipients', implode(PHP_EOL, $recipients));
+		$this->Invoice->id = $id;
+		if (!$this->Invoice->exists()) {
+			throw new NotFoundException(__('Invalid invoice.'));
 		}
-		if (!empty($this->request->data['Invoice']['recipient'])) :
-			$recipients = explode(PHP_EOL, $this->request->data['Invoice']['recipient']);
-			foreach ($recipients as $recipient) :
-				$url = 'http://' . $_SERVER['HTTP_HOST'] . '/invoices/invoices/view/' . $invoice['Invoice']['id'];
-				$message = '<p>You have a new invoice: <a href="'.$url.'">'.$url.'</a></p>';
-				$this->__sendMail(trim($recipient), 'Invoice : ' . $invoice['Invoice']['name'], $message, $template = 'default');
-			endforeach;
-			$invoice['Invoice']['is_sent'] = $invoice['Invoice']['is_sent'] + 1;
-			if ($this->Invoice->save($invoice)) : 
+  		
+		if(!empty($this->request->data['Invoice']['recipient'])) {
+			$recipients = explode(',', str_replace(' ', '', $this->request->data['Invoice']['recipient']));
+			$subject = $this->request->data['Invoice']['subject'];
+			$message = $this->request->data['Invoice']['message'];
+			foreach ($recipients as $recipient) {
+				$this->__sendMail(trim($recipient), $subject, $message, $template = 'default');
+			}
+			$this->request->data['Invoice']['is_sent'] = $this->request->data['Invoice']['is_sent'] + 1;
+			try {
+				$this->Invoice->save($this->request->data);
 				$this->Session->setFlash(__('Invoice Emailed', true));
-				$this->redirect(array('action' => 'view', $invoice['Invoice']['id']));
-			else : 
-				$this->Session->setFlash(__('Mail probably sent but invoice sent count not updated.', true));
-				$this->redirect(array('action' => 'view', $invoice['Invoice']['id']));
-			endif;
+				$this->redirect(array('action' => 'view', $this->request->data['Invoice']['id']));
+			} catch (Exception $e) {
+				$this->Session->setFlash($e->getMessage() . 'Invoice count not updated');
+			}
+		}
+		
+		$invoice = $this->Invoice->find('first', array(
+			'conditions' => array(
+				'Invoice.id' => $id,
+				),
+			'contain' => array(
+				'Contact' => array(
+					'Employee' => array(
+						'User',
+						),
+					),
+				'Creator',
+				),
+			));
+		if (!empty($invoice['Contact']['Employee'][0])) : 
+			foreach ($invoice['Contact']['Employee'] as $employee) :
+				$recipients[] = $employee['User']['email'];
+			endforeach;
 		endif;
+		
+		if (!empty($invoice['Creator']['email'])) :
+			$recipients[] = $invoice['Creator']['email'];
+		endif;
+		
+		$this->set('page_title_for_layout', $invoice['Invoice']['name']);
+		$this->set(compact('invoice'));		
+		$this->request->data['Invoice']['is_sent'] = $invoice['Invoice']['is_sent'];
+		$this->request->data['Invoice']['recipient'] = implode(', ', $recipients);
+		$this->request->data['Invoice']['subject'] = 'Invoice : ' . $invoice['Invoice']['name'];
+		$url = '<a href="http://' . $_SERVER['HTTP_HOST'] . '/invoices/invoices/view/' . $invoice['Invoice']['id'] .'">' . $_SERVER['HTTP_HOST'] . '/invoices/invoices/view/' . $invoice['Invoice']['id'] . '</a>';
+		
+		$message = defined('__INVOICES_EMAIL_TEMPLATES') ? unserialize(__INVOICES_EMAIL_TEMPLATES) : '<p>You have an invoice: ' . $url;
+		$this->request->data['Invoice']['message'] =  str_replace('{viewLink}', $url, $message['template'][0]); // temporary till we setup multi templates
 	}
 	
 	function _generateInvoiceNumber() {

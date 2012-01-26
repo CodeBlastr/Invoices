@@ -63,29 +63,33 @@
               <p><?php echo ZuhaInflector::pricify($invoice['Invoice']['balance']); ?></p></td>
           </tr>
         </table>
-        <div class="invoiceEmail form">
-			<?php echo $this->Form->create('Invoice');?>
-            <?php echo $this->Form->hidden('Invoice.id', array('value' => $invoice['Invoice']['id'])); ?>
-            <?php echo $this->Form->textarea('Invoice.recipient', array('value' => $recipients)); ?>
-            <?php echo $this->Form->end('Email Invoice'); ?>
-        </div>
       </div>
     </div>
   </div>
   <!-- /info-block end -->
 </div>
+        <div class="invoiceEmail form">
+			<?php echo $this->Form->create('Invoice');?>
+            <fieldset>
+            <legend><?php echo __('Email invoice'); ?></legend>
+            <?php 
+			echo $this->Form->hidden('Invoice.id', array('value' => $invoice['Invoice']['id']));
+			echo $this->Form->hidden('Invoice.is_sent');
+			echo $this->Form->input('Invoice.subject');
+			echo $this->Form->input('Invoice.recipient');
+			echo $this->Form->input('Invoice.message', array('type' => 'richtext')); ?>
+            </fieldset>
+            <?php echo $this->Form->end('Email Invoice'); ?>
+        </div>
 <?php
 // set the contextual menu items
 $this->set('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoice',
 		'items' => array(
-			$this->Html->link(__('New Invoice', true), array('controller' => 'invoices', 'action' => 'add')),
-			$this->Html->link(__('List Invoices', true), array('controller' => 'invoices', 'action' => 'index')),
-			$this->Html->link(__('Edit Invoice', true), array('controller' => 'invoices', 'action' => 'edit', $invoice['Invoice']['id'])),
-			$this->Html->link(__('Email Invoice', true), array('controller' => 'invoices', 'action' => 'email', $invoice['Invoice']['id'])),
+			$this->Html->link(__('Add', true), array('controller' => 'invoices', 'action' => 'add'), array('class' => 'add')),
+			$this->Html->link(__('List', true), array('controller' => 'invoices', 'action' => 'index'), array('class' => 'index')),
+			$this->Html->link(__('Edit', true), array('controller' => 'invoices', 'action' => 'edit', $invoice['Invoice']['id']), array('class' => 'edit')),
 			)
 		),
-	))); 
-?>
-<?php $this->set('page_title_for_layout', $invoice['Invoice']['name']); ?>
+	))); ?>
