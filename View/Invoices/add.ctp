@@ -78,10 +78,9 @@ $this->set('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoices',
 		'items' => array(
-			$this->Html->link(__('List Invoices', true), array('controller' => 'invoices', 'action' => 'index')),
+			$this->Html->link(__('List', true), array('controller' => 'invoices', 'action' => 'index'), array('class' => 'index')),
 			)
 		),
-	)));
-?>
+	))); ?>
 <?php echo $this->Html->script('/js/jquery.formmodifier.js');?>
 <?php echo $this->Html->script('/invoices/invoice.js');?>
