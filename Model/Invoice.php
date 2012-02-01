@@ -141,13 +141,13 @@ class Invoice extends AppModel {
 		
 		
 		#for updates you have to submit all hasMany model records or they get deleted
-		if (!empty($data['InvoiceItem'][0]) && !empty($data['Invoice']['id'])) : 
+		if (!empty($data['Invoice']['id'])) : 
 			$currentItems = $this->InvoiceItem->find('all', array(
 				'conditions' => array('InvoiceItem.invoice_id' => $data['Invoice']['id'])));
 			$currentItems = Set::extract('/InvoiceItem/id', $currentItems);
 			$this->InvoiceItem->deleteAll(array('InvoiceItem.id' => $currentItems));
 		endif;
-		if (!empty($data['InvoiceTime'][0]) && !empty($data['Invoice']['id'])) : 
+		if (!empty($data['Invoice']['id'])) : 
 			$currentTimes = $this->InvoiceTime->find('all', array(
 				'conditions' => array('InvoiceTime.invoice_id' => $data['Invoice']['id'])));
 			$currentTimes = Set::extract('/InvoiceTime/id', $currentTimes);
