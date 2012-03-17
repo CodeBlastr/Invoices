@@ -1,8 +1,8 @@
 <?php
 class Invoice extends AppModel {
-	var $name = 'Invoice';
-	var $displayField = 'name';
-	var $validate = array(
+	public $name = 'Invoice';
+	public $displayField = 'name';
+	public $validate = array(
 		'invoice_status' => array(
 			'notempty' => array(
 				'rule' => array('notempty'),
@@ -14,10 +14,8 @@ class Invoice extends AppModel {
 			),
 		),
 	);
-	# var $actsAs = array('Users.Usable' => array('defaultRole' => 'client')); // removed because it doesn't seem to make sense to force people to be registered in order to pay an invoice.
-	//The Associations below have been created with all possible keys, those that are not needed can be removed
-
-	var $belongsTo = array(
+	
+	public $belongsTo = array(
 		'Project' => array(
 			'className' => 'Projects.Project',
 			'foreignKey' => 'project_id',
@@ -41,7 +39,7 @@ class Invoice extends AppModel {
 		),
 	);
 
-	var $hasMany = array(
+	public $hasMany = array(
 		'InvoiceItem' => array(
 			'className' => 'Invoices.InvoiceItem',
 			'foreignKey' => 'invoice_id',
@@ -70,7 +68,7 @@ class Invoice extends AppModel {
 		)
 	);
 	
-	function add($data) {
+	public function add($data) {
 		$data = $this->cleanData($data);
 		
 		if ($this->saveAll($data)) {
@@ -89,7 +87,7 @@ class Invoice extends AppModel {
 	}
 	
 	
-	function cleanData($data) {
+	public function cleanData($data) {
 		
 		# clear Invoice Item if its empty
 		$i = 0;
