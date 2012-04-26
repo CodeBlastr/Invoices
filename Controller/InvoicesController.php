@@ -187,21 +187,34 @@ class InvoicesController extends AppController {
 			endif;
 		endif;
 		
-		if ($type == 'timesheet') :
+		if ($type == 'timesheet') {
 			$this->set('element', 'generate/timesheet');
-		else : 
+		} else {
 			$contacts = $this->Invoice->Project->findContactsWithProjects('list');
 			$projects = $this->Invoice->Project->find('all', array(
 				'contain' => array(
 					'Invoice' => array(
-						'order' => 'created',
+						'fields' => array(
+							'Invoice.id',
+							'Invoice.created',
+							'Invoice.project_id',
+							'Invoice.contact_id',
+							),
+						'order' => array(
+							'created' => 'DESC',
+							),
 						'limit' => 1,
 						),
+					),
+				'fields' => array(
+					'Project.id',
+					'Project.displayName',
+					'Project.contact_id',
 					),
 				));
 			$this->set(compact('contacts', 'projects'));
 			$this->set('element', 'generate/project');
-		endif;		
+		}
 	}
 	
 	
