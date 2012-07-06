@@ -18,7 +18,6 @@ class InvoicesController extends AppController {
 				'balance',
 				'due_date',
 				),
-			'limit' => 10,
 			'order' => array(
 				'created DESC',
 				),
