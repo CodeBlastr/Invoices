@@ -91,18 +91,19 @@ class Invoice extends AppModel {
 		
 		# clear Invoice Item if its empty
 		$i = 0;
-		if (!empty($data['InvoiceItem'])) : 
-		$data['InvoiceItem'] = array_values($data['InvoiceItem']);  
-		foreach ($data['InvoiceItem'] as $invoiceItem) : 
-			if (empty($invoiceItem['quantity'])) :
-				unset($data['InvoiceItem'][$i]);
-			endif;
-			$i++;
-		endforeach; endif;
+		if (!empty($data['InvoiceItem'])) {
+			$data['InvoiceItem'] = array_values($data['InvoiceItem']);  
+			foreach ($data['InvoiceItem'] as $invoiceItem) {
+				if (empty($invoiceItem['quantity'])) {
+					unset($data['InvoiceItem'][$i]);
+				}
+				$i++;
+			}
+		}
 		
-		if (empty($data['InvoiceItem'])) :
+		if (empty($data['InvoiceItem'])) {
 			unset($data['InvoiceItem']);
-		endif;
+		}
 		
 		# clear Invoice time if its empty
 		$i = 0;
