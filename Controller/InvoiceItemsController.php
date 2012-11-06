@@ -28,8 +28,8 @@ class InvoiceItemsController extends AppController {
 			}
 		}
 		$invoices = $this->InvoiceItem->Invoice->find('list');
-		$catalogItems = $this->InvoiceItem->CatalogItem->find('list');
-		$this->set(compact('invoices', 'catalogItems'));
+		$products = $this->InvoiceItem->Product->find('list');
+		$this->set(compact('invoices', 'products'));
 	}
 
 	function edit($id = null) {
@@ -49,8 +49,8 @@ class InvoiceItemsController extends AppController {
 			$this->request->data = $this->InvoiceItem->read(null, $id);
 		}
 		$invoices = $this->InvoiceItem->Invoice->find('list');
-		$catalogItems = $this->InvoiceItem->CatalogItem->find('list');
-		$this->set(compact('invoices', 'catalogItems'));
+		$products = $this->InvoiceItem->Product->find('list');
+		$this->set(compact('invoices', 'products'));
 	}
 
 	function delete($id = null) {

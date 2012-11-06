@@ -1,11 +1,15 @@
 <?php
 class InvoiceItem extends AppModel {
-	var $name = 'InvoiceItem';
-	var $displayField = 'name';
-	var $validate = array();
+	
+	public $name = 'InvoiceItem';
+	
+	public $displayField = 'name';
+	
+	public $validate = array();
+	
 	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
-	var $belongsTo = array(
+	public $belongsTo = array(
 		'Invoice' => array(
 			'className' => 'Invoices.Invoice',
 			'foreignKey' => 'invoice_id',
@@ -13,13 +17,12 @@ class InvoiceItem extends AppModel {
 			'fields' => '',
 			'order' => ''
 		),
-		'CatalogItem' => array(
-			'className' => 'Catalogs.CatalogItem',
-			'foreignKey' => 'catalog_item_id',
+		'Product' => array(
+			'className' => 'Products.Product',
+			'foreignKey' => 'product_id',
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
 		)
 	);
 }
-?>
