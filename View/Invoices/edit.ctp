@@ -73,7 +73,7 @@
       <?php foreach($this->request->data['InvoiceItem'] as $invoiceTime): ?>
       <tr id="line<?php echo $i; ?>Item" class="invoiceItemLine itemRow">
 	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.id'); ?>
-	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.catalog_item_id'); ?>
+	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.foreign_key'); ?>
 	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.creator_id'); ?>
 	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.created'); ?>
       	<td><a class="newItemlink" href="#">New</a>, <a href="#" id="line<?php echo $i; ?>Item" class="deleteItemLink">Delete</a></td>
