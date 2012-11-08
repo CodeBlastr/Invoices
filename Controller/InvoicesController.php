@@ -5,7 +5,7 @@ class InvoicesController extends AppController {
 	public $uses = 'Invoices.Invoice';
 	public $order = array('number', 'due_date');
 
-	function index($status = array('unpaid', 'partpaid')) {
+	public function index($status = array('unpaid', 'partpaid')) {
 		$this->paginate = array(
 			'conditions' => array(
 				'Invoice.status' => $status,
@@ -52,7 +52,7 @@ class InvoicesController extends AppController {
 		$this->set(compact('pageActions')); 
 	}
 
-	function view($id = null) {
+	public function view($id = null) {
 		$invoice = $this->Invoice->find('first', array(
 			'contain' => array(
 				'InvoiceTime',
@@ -73,7 +73,7 @@ class InvoicesController extends AppController {
 		$this->set('title_for_layout',  strip_tags($invoice['Invoice']['name']));
 	}
 
-	function add() {
+	public function add() {
 		if (!empty($this->request->data)) {
 			try {
 				$this->Invoice->add($this->request->data);
@@ -92,7 +92,7 @@ class InvoicesController extends AppController {
 		$this->set(compact('contacts', 'invoiceNumber', 'dueDate', 'defaultIntroduction', 'defaultConclusion'));
 	}
 
-	function edit($id = null) {
+	public function edit($id = null) {
 		if (!$id && empty($this->request->data)) {
 			$this->Session->setFlash(__('Invalid invoice', true));
 			$this->redirect(array('action' => 'index'));
@@ -115,7 +115,7 @@ class InvoicesController extends AppController {
 		$this->set(compact('contacts'));
 	}
 
-	function delete($id = null) {
+	public function delete($id = null) {
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid id for invoice', true));
 			$this->redirect(array('action'=>'index'));
@@ -129,13 +129,13 @@ class InvoicesController extends AppController {
 	}
 
 
-	/** 
-	 * Generate an invoice from data gathered in another plugin
-	 * 
-	 * @param {string}		The plugin identifier generating the plugin
-	 */
-	function generate($type = 'project') {
-		if (!empty($this->request->data)) :
+/** 
+ * Generate an invoice from data gathered in another plugin
+ * 
+ * @param {string}		The plugin identifier generating the plugin
+ */
+	public function generate($type = 'project') {
+		if (!empty($this->request->data)) {
 			$projectIds = array_values(array_filter($this->request->data['Invoice']['project_id'])); //reindex & filter zero values
 			$project = $this->Invoice->Project->find('first', array('conditions' => array('Project.id' => $projectIds[0])));
 			$conditions['TimesheetTime.project_id'] = $projectIds;
@@ -163,7 +163,9 @@ class InvoicesController extends AppController {
 			$rate = defined('__INVOICES_DEFAULT_RATE') ? __INVOICES_DEFAULT_RATE : '0';
 			$rate = !empty($this->request->data['Invoice']['rate']) ? $this->request->data['Invoice']['rate'] : '0'; // over write default if provided
 			
-			$i=0; $total=0; foreach ($times as $invTime) :
+			$i=0; 
+			$total=0; 
+			foreach ($times as $invTime) {
 				$data['InvoiceTime'][$i]['name'] = !empty($invTime['Task']['name']) ? $invTime['Task']['name'] : $invTime['ProjectIssue']['name'];  // support the deprecated project_issues table
 				$data['InvoiceTime'][$i]['notes'] = date('M j, Y', strtotime($invTime['TimesheetTime']['created'])) . ', ' .$invTime['TimesheetTime']['comments'];
 				$data['InvoiceTime'][$i]['rate'] = $rate;
@@ -174,17 +176,17 @@ class InvoicesController extends AppController {
 				$lineTotal = $rate * $invTime['TimesheetTime']['hours'];
 				$total =  $total + $lineTotal;
 				$i++;
-			endforeach;
+			}
 			$data['Invoice']['total'] = $total;
 			$data['Invoice']['balance'] = $total;
 						
-			if ($this->Invoice->add($data)) : 
+			if ($this->Invoice->add($data)) {
 				$this->Session->setFlash(__('Invoice generated', true));
 				$this->redirect(array('action' => 'edit', $this->Invoice->id));
-			else : 
+			} else { 
 				$this->Session->setFlash(__('Invoice generation failed.', true));
-			endif;
-		endif;
+			}
+		}
 		
 		if ($type == 'timesheet') {
 			$this->set('element', 'generate/timesheet');
@@ -217,12 +219,12 @@ class InvoicesController extends AppController {
 	}
 	
 	
-	/**
-	 * Find all the email address associated with an invoice, and list them in an editable page before sending.
-	 *
-	 * @param {int}		The invoice id
-	 */
-	function email($id = null) {
+/**
+ * Find all the email address associated with an invoice, and list them in an editable page before sending.
+ *
+ * @param {int}		The invoice id
+ */
+	public function email($id = null) {
 		$this->Invoice->id = $id;
 		if (!$this->Invoice->exists()) {
 			throw new NotFoundException(__('Invalid invoice.'));
@@ -279,11 +281,10 @@ class InvoicesController extends AppController {
 		$this->request->data['Invoice']['message'] =  str_replace('{viewLink}', $url, $message['template'][0]); // temporary till we setup multi templates
 	}
 	
-	function _generateInvoiceNumber() {
+	public function _generateInvoiceNumber() {
 		return str_pad($this->Invoice->find('count') + 1, 7, '0', STR_PAD_LEFT);
 	}
 	
-	function dashboard() {
+	public function dashboard() {
 	}
 }
-?>
