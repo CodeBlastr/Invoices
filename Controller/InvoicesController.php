@@ -1,6 +1,11 @@
 <?php
 class InvoicesController extends AppController {
 
+/**
+ * Name
+ * 
+ * var string
+ */
 	public $name = 'Invoices';
 	public $uses = 'Invoices.Invoice';
 	public $order = array('number', 'due_date');
@@ -53,23 +58,23 @@ class InvoicesController extends AppController {
 	}
 
 	public function view($id = null) {
+		$this->Invoice->id = $id;
+		if (!$this->Invoice->exists()) {
+			throw new NotFoundException(__('Invoice not found'));
+		}
 		$invoice = $this->Invoice->find('first', array(
-			'contain' => array(
-				'InvoiceTime',
-				'InvoiceItem',
-				),
 			'conditions' => array(
 				'Invoice.id' => $id
-				)
-			)
-		);
+				),
+			'contain' => array(
+				'InvoiceTime' => array(
+					'order' => 'created'
+					),
+				'InvoiceItem',
+				),
+			));
 		
-		if (!empty($invoice)) {
-			$this->set(compact('invoice', 'trackedHoursSum', 'percentComplete'));
-		} else {
-			$this->Session->setFlash(__('Invalid Invoice.', true));
-			$this->redirect(array('action' => 'index'));
-		}
+		$this->set(compact('invoice', 'trackedHoursSum', 'percentComplete'));
 		$this->set('title_for_layout',  strip_tags($invoice['Invoice']['name']));
 	}
 
@@ -93,9 +98,9 @@ class InvoicesController extends AppController {
 	}
 
 	public function edit($id = null) {
-		if (!$id && empty($this->request->data)) {
-			$this->Session->setFlash(__('Invalid invoice', true));
-			$this->redirect(array('action' => 'index'));
+		$this->Invoice->id = $id;
+		if (!$this->Invoice->exists()) {
+			throw new NotFoundException(__('Invoice not found'));
 		}
 		if (!empty($this->request->data)) {
 			try {
@@ -106,19 +111,28 @@ class InvoicesController extends AppController {
 				$this->Session->setFlash($e->getMessage());
 			}
 		}
-		if (empty($this->request->data)) {
-			$this->Invoice->contain(array('InvoiceTime', 'InvoiceItem'));
-			$this->request->data = $this->Invoice->read(null, $id);
-			$this->request->data['Invoice']['balance'] = !empty($this->request->data['Invoice']['balance']) ? ZuhaInflector::pricify($this->request->data['Invoice']['balance']) : null;
-		}
+
+		$this->request->data = $this->Invoice->find('first', array(
+			'conditions' => array(
+				'Invoice.id' => $id
+				),
+			'contain' => array(
+				'InvoiceTime' => array(
+					'order' => 'created'
+					),
+				'InvoiceItem',
+				),
+			));
+		$this->request->data['Invoice']['balance'] = !empty($this->request->data['Invoice']['balance']) ? ZuhaInflector::pricify($this->request->data['Invoice']['balance']) : null;
 		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
 		$this->set(compact('contacts'));
+		$this->set('page_title_for_layout', __('Edit %s', $this->request->data['Invoice']['name']));
 	}
 
 	public function delete($id = null) {
-		if (!$id) {
-			$this->Session->setFlash(__('Invalid id for invoice', true));
-			$this->redirect(array('action'=>'index'));
+		$this->Invoice->id = $id;
+		if (!$this->Invoice->exists()) {
+			throw new NotFoundException(__('Invoice not found'));
 		}
 		if ($this->Invoice->delete($id)) {
 			$this->Session->setFlash(__('Invoice deleted', true));
@@ -173,6 +187,7 @@ class InvoicesController extends AppController {
 				$data['InvoiceTime'][$i]['project_id'] = $projectIds[0];
 				$data['InvoiceTime'][$i]['task_id'] = $invTime['Task']['id'];
 				$data['InvoiceTime'][$i]['time_id'] = $invTime['TimesheetTime']['id'];
+				$data['InvoiceTime'][$i]['created'] = $invTime['TimesheetTime']['created'];
 				$lineTotal = $rate * $invTime['TimesheetTime']['hours'];
 				$total =  $total + $lineTotal;
 				$i++;

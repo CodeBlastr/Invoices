@@ -1,8 +1,5 @@
 <div class="invoice form"> <?php echo $this->Form->create('Invoice');?>
   <fieldset>
-    <legend>
-    <p>New Invoice</p>
-    </legend>
     <?php
 		echo $this->Form->hidden('Invoice.id');
 		echo $this->Form->hidden('Invoice.status');
@@ -31,11 +28,6 @@
       <?php foreach($this->request->data['InvoiceTime'] as $invoiceTime): ?>
       <tr id="line<?php echo $i; ?>Time" class="invoiceTimeLine timeRow">
 	    <?php echo $this->Form->hidden('InvoiceTime.'.$i.'.id'); ?>
-	    <?php echo $this->Form->hidden('InvoiceTime.'.$i.'.project_id'); ?>
-	    <?php echo $this->Form->hidden('InvoiceTime.'.$i.'.task_id'); ?>
-	    <?php echo $this->Form->hidden('InvoiceTime.'.$i.'.time_id'); ?>
-	    <?php echo $this->Form->hidden('InvoiceTime.'.$i.'.creator_id'); ?>
-	    <?php echo $this->Form->hidden('InvoiceTime.'.$i.'.created'); ?>
       	<td><a class="newTimelink" href="#">New</a>, <a href="#" id="line<?php echo $i; ?>Time" class="deleteTimeLink">Delete</a></td>
         <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.name', array('label' => false)); ?></td>
         <td ><?php echo $this->Form->input('InvoiceTime.'.$i.'.notes', array('type' => 'text', 'label' => false)); ?></td>
@@ -73,9 +65,6 @@
       <?php foreach($this->request->data['InvoiceItem'] as $invoiceTime): ?>
       <tr id="line<?php echo $i; ?>Item" class="invoiceItemLine itemRow">
 	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.id'); ?>
-	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.foreign_key'); ?>
-	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.creator_id'); ?>
-	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.created'); ?>
       	<td><a class="newItemlink" href="#">New</a>, <a href="#" id="line<?php echo $i; ?>Item" class="deleteItemLink">Delete</a></td>
         <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.name', array('label' => false)); ?></td>
         <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.description', array('type' => 'text', 'label' => false)); ?></td>
@@ -119,12 +108,12 @@ $this->set('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoices',
 		'items' => array(
-			$this->Html->link(__('View Invoice', true), array('controller' => 'invoices', 'action' => 'view', $this->request->data['Invoice']['id'])),
-			$this->Html->link(__('List Invoices', true), array('controller' => 'invoices', 'action' => 'index')),
-			$this->Html->link(__('New Invoice', true), array('controller' => 'invoices', 'action' => 'add')),
-			$this->Html->link(__('Delete Invoice', true), array('controller' => 'invoices', 'action' => 'delete', $this->request->data['Invoice']['id'])),
+			$this->Html->link(__('View'), array('controller' => 'invoices', 'action' => 'view', $this->request->data['Invoice']['id'])),
+			$this->Html->link(__('List'), array('controller' => 'invoices', 'action' => 'index')),
+			$this->Html->link(__('Add'), array('controller' => 'invoices', 'action' => 'add')),
+			$this->Html->link(__('Delete'), array('controller' => 'invoices', 'action' => 'delete', $this->request->data['Invoice']['id'])),
 			)
 		),
 	))); ?>
-<?php echo $this->Html->script('/js/jquery.formmodifier.js');?>
+<?php echo $this->Html->script('/js/plugins/jquery.formmodifier.js');?>
 <?php echo $this->Html->script('/invoices/invoice.js');?>

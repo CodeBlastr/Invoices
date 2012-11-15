@@ -19,7 +19,7 @@ class InvoiceItem extends AppModel {
 		),
 		'Product' => array(
 			'className' => 'Products.Product',
-			'foreignKey' => 'product_id',
+			'foreignKey' => 'foreign_key',
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
