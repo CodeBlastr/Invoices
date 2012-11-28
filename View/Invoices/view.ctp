@@ -88,11 +88,11 @@ $this->set('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoice',
 		'items' => array(
-			$this->Html->link(__('Add', true), array('controller' => 'invoices', 'action' => 'add'), array('class' => 'add')),
-			$this->Html->link(__('List', true), array('controller' => 'invoices', 'action' => 'index'), array('class' => 'index')),
-			$this->Html->link(__('Edit', true), array('controller' => 'invoices', 'action' => 'edit', $invoice['Invoice']['id']), array('class' => 'edit')),
-			$this->Html->link(__('Email', true), array('controller' => 'invoices', 'action' => 'email', $invoice['Invoice']['id'])),
-			$this->Html->link(__('Delete', true), array('controller' => 'invoices', 'action' => 'delete', $invoice['Invoice']['id']), array('class' => 'delete'), 'Are you sure you want to delete "'.strip_tags($invoice['Invoice']['name']).'"'),
+			$this->Html->link(__('Add'), array('controller' => 'invoices', 'action' => 'add')),
+			$this->Html->link(__('List'), array('controller' => 'invoices', 'action' => 'index')),
+			$this->Html->link(__('Edit'), array('controller' => 'invoices', 'action' => 'edit', $invoice['Invoice']['id'])),
+			$this->Html->link(__('Email'), array('controller' => 'invoices', 'action' => 'email', $invoice['Invoice']['id'])),
+			$this->Html->link(__('Delete'), array('controller' => 'invoices', 'action' => 'delete', $invoice['Invoice']['id']), null, __('Are you sure you want to delete %s', strip_tags($invoice['Invoice']['name']))),
 			)
 		),
 	))); 

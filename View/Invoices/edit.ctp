@@ -111,7 +111,7 @@ $this->set('context_menu', array('menus' => array(
 			$this->Html->link(__('View'), array('controller' => 'invoices', 'action' => 'view', $this->request->data['Invoice']['id'])),
 			$this->Html->link(__('List'), array('controller' => 'invoices', 'action' => 'index')),
 			$this->Html->link(__('Add'), array('controller' => 'invoices', 'action' => 'add')),
-			$this->Html->link(__('Delete'), array('controller' => 'invoices', 'action' => 'delete', $this->request->data['Invoice']['id'])),
+    		$this->Html->link(__('Delete'), array('controller' => 'invoices', 'action' => 'delete', $this->request->data['Invoice']['id']), null, __('Are you sure you want to delete %s', strip_tags($this->request->data['Invoice']['name']))),
 			)
 		),
 	))); ?>
