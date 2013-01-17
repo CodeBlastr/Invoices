@@ -77,7 +77,7 @@
             <?php echo $this->Form->end('Enter Payment On Invoice'); ?>
         </div-->
       </div>
-        <div id="invoicePayButton"> <a href="https://www.razorit.com/checkout/?a=<?php echo ZuhaInflector::pricify($invoice['Invoice']['balance']); ?>" class="button">Enter Payment on Invoice</a> </div>
+        <div id="invoicePayButton"> <a href="https://www.razorit.com/checkout/?a=<?php echo number_format($invoice['Invoice']['balance'], 2, '.', ''); ?>" class="button">Enter Payment on Invoice</a> </div>
     </div>
   </div>
   <!-- /info-block end -->
