@@ -110,6 +110,13 @@ $(document).ready(function() {
 	  idNumber = idNumber.replace(eval("/InvoiceItem|Name/ig"), '');
 	  $("#InvoiceItem"+idNumber+"Description").val( $("#reusableDesc_"+idNumber).html() );
 	  $("#InvoiceItem"+idNumber+"UnitCost").val( $("#reusableUnit_"+idNumber).html() );
+	  $("#InvoiceItem"+idNumber+"Quantity").val( '1' );
+	  if ( !$(this).val() ) {
+		$("#InvoiceItem"+idNumber+"Description").val('');
+		$("#InvoiceItem"+idNumber+"UnitCost").val('');
+		$("#InvoiceItem"+idNumber+"Quantity").val('');
+		$("#lineItem"+idNumber+"Total").val('0.00');
+	  }
 	});
 	
 	// handle the calculations
