@@ -123,6 +123,7 @@ class InvoicesController extends AppController {
 				'InvoiceItem',
 				),
 			));
+		$this->set( 'reusableItems', $this->Invoice->InvoiceItem->find('all', array('conditions' => array('is_reusable'=>1))) );
 		$this->request->data['Invoice']['balance'] = !empty($this->request->data['Invoice']['balance']) ? ZuhaInflector::pricify($this->request->data['Invoice']['balance']) : null;
 		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
 		$this->set(compact('contacts'));
@@ -301,5 +302,17 @@ class InvoicesController extends AppController {
 	}
 	
 	public function dashboard() {
+	}
+	
+	public function pay($id, $amount = null) {
+		
+		if ( !empty($this->request->data) ) {
+			App::uses('TransactionItem', 'TransactionItem.Model');
+			$TransactionItem = new TransactionItem;
+			//derr...  To Be Continued!
+			
+		}
+		
+		$this->set( 'invoice', $this->Invoice->findById($id) );
 	}
 }

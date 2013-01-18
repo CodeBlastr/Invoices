@@ -15,6 +15,9 @@
 	?>
   </fieldset>
   <table class="invoiceTimeLines">
+	  <tr>
+		  <th colspan="6">Hourly Items</th>
+	  </tr>
     <tr>
       <th>&nbsp;</th>
       <th>Task</th>
@@ -28,11 +31,14 @@
       <?php foreach($this->request->data['InvoiceTime'] as $invoiceTime): ?>
       <tr id="line<?php echo $i; ?>Time" class="invoiceTimeLine timeRow">
 	    <?php echo $this->Form->hidden('InvoiceTime.'.$i.'.id'); ?>
-      	<td><a class="newTimelink" href="#">New</a>, <a href="#" id="line<?php echo $i; ?>Time" class="deleteTimeLink">Delete</a></td>
+      	<td>
+			<a class="newTimelink btn-mini btn-primary" href="#">New</a>
+			<a href="#" id="line<?php echo $i; ?>Time" class="deleteTimeLink btn-mini btn-danger">Delete</a>
+		</td>
         <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.name', array('label' => false)); ?></td>
         <td ><?php echo $this->Form->input('InvoiceTime.'.$i.'.notes', array('type' => 'text', 'label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.rate', array('label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.hours', array('label' => false)); ?></td>
+        <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.rate', array('label' => false, 'class' => 'span1')); ?></td>
+        <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.hours', array('label' => false, 'class' => 'span1')); ?></td>
         <td id="lineTime<?php echo $i; ?>Total" class="lineTotal"> 0.00 </td>
         <td></td>
       </tr>
@@ -41,17 +47,23 @@
     <?php endif; ?>
     <tbody class="invoiceTimes">
       <tr id="line<?php echo $i; ?>Time" class="invoiceTimeLine timeRow">
-      	<td><a class="newTimelink" href="#">New</a>, <a href="#" id="line<?php echo $i; ?>Time" class="deleteTimeLink">Delete</a></td>
+      	<td>
+			<a class="newTimelink btn-mini btn-primary" href="#">New</a>
+			<a href="#" id="line<?php echo $i; ?>Time" class="deleteTimeLink btn-mini btn-danger">Delete</a>
+		</td>
         <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.name', array('label' => false)); ?></td>
         <td ><?php echo $this->Form->input('InvoiceTime.'.$i.'.notes', array('type' => 'text', 'label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.rate', array('label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.hours', array('label' => false)); ?></td>
+        <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.rate', array('label' => false, 'class' => 'span1')); ?></td>
+        <td><?php echo $this->Form->input('InvoiceTime.'.$i.'.hours', array('label' => false, 'class' => 'span1')); ?></td>
         <td id="lineTime<?php echo $i; ?>Total" class="lineTotal"> 0.00 </td>
         <td></td>
       </tr>
     </tbody>
   </table>
   <table class="invoiceItemLines">
+	  <tr>
+		  <th colspan="6">Flat-Rate Items</th>
+	  </tr>
     <tr>
       <th>&nbsp;</th>
       <th>Item</th>
@@ -65,11 +77,15 @@
       <?php foreach($this->request->data['InvoiceItem'] as $invoiceTime): ?>
       <tr id="line<?php echo $i; ?>Item" class="invoiceItemLine itemRow">
 	    <?php echo $this->Form->hidden('InvoiceItem.'.$i.'.id'); ?>
-      	<td><a class="newItemlink" href="#">New</a>, <a href="#" id="line<?php echo $i; ?>Item" class="deleteItemLink">Delete</a></td>
+      	<td>
+			<a class="newItemlink btn-mini btn-primary" href="#">New</a>
+			<a href="#" id="line<?php echo $i; ?>Item" class="deleteItemLink btn-mini btn-danger">Delete</a>
+			<?php echo $this->Form->input('InvoiceItem.'.$i.'.is_reusable', array('type' => 'checkbox', 'checked' => false)) ?>
+		</td>
         <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.name', array('label' => false)); ?></td>
         <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.description', array('type' => 'text', 'label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.unit_cost', array('label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.quantity', array('label' => false)); ?></td>
+        <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.unit_cost', array('label' => false, 'class' => 'span1')); ?></td>
+        <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.quantity', array('label' => false, 'class' => 'span1')); ?></td>
         <td id="lineItem<?php echo $i; ?>Total" class="lineTotal"> 0.00 </td>
       </tr>
       <?php $i = $i + 1; endforeach; ?>
@@ -77,13 +93,53 @@
     <?php endif;  ?>
     <tbody class="invoiceItems">
       <tr id="line<?php echo $i; ?>Item" class="invoiceItemLine itemRow">
-      	<td><a class="newItemlink" href="#">New</a>, <a href="#" id="line<?php echo $i; ?>Item" class="deleteItemLink">Delete</a></td>
+      	<td>
+			<a class="newItemlink btn-mini btn-primary" href="#">New</a>
+			<a href="#" id="line<?php echo $i; ?>Item" class="deleteItemLink btn-mini btn-danger">Delete</a>
+			<?php echo $this->Form->input('InvoiceItem.'.$i.'.is_reusable', array('type' => 'checkbox', 'checked' => false)) ?>
+		</td>
         <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.name', array('label' => false)); ?></td>
         <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.description', array('type' => 'text', 'label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.unit_cost', array('label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.quantity', array('label' => false)); ?></td>
+        <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.unit_cost', array('label' => false, 'class' => 'span1')); ?></td>
+        <td><?php echo $this->Form->input('InvoiceItem.'.$i.'.quantity', array('label' => false, 'class' => 'span1')); ?></td>
         <td id="lineItem<?php echo $i; ?>Total" class="lineTotal"> 0.00 </td>
       </tr>
+	  
+    </tbody>
+    <tbody class="reusableItems">
+	  <?php
+	  if ( !empty($reusableItems) ) {
+		  ++$i;
+	  ?>
+      <tr id="line<?php echo $i; ?>Item" class="reusableItemLine itemRow">
+		  <td>
+			<a class="newReuseItemlink btn-mini btn-primary" href="#">New</a>
+			<a href="#" id="line<?php echo $i; ?>Item" class="deleteReuseItemLink btn-mini btn-danger">Delete</a>
+		  </td>
+		  <td>
+			  <?php
+				  $reusableItemsOptions = array();
+				  foreach ( $reusableItems as $reusableItem ) {
+					  $reusableItemsOptions[ $reusableItem['InvoiceItem']['name'] ] = $reusableItem['InvoiceItem']['name'];
+					  echo $this->Html->div('hidden', $reusableItem['InvoiceItem']['description'], array('id' => 'reusableDesc_'.$i));
+					  echo $this->Html->div('hidden', $reusableItem['InvoiceItem']['unit_cost'], array('id' => 'reusableUnit_'.$i));
+				  }
+				  echo $this->Form->input('InvoiceItem.'.$i.'.name', array(
+					  'options' => $reusableItemsOptions, 'empty' => '(Add Reusable Item)',
+					  'label' => false,
+					  'class' => 'reusableSelect'
+					  ));
+			?>
+		  </td>
+			<td><?php echo $this->Form->input('InvoiceItem.'.$i.'.description', array('type' => 'text', 'label' => false)); ?></td>
+			<td><?php echo $this->Form->input('InvoiceItem.'.$i.'.unit_cost', array('label' => false, 'class' => 'span1')); ?></td>
+			<td><?php echo $this->Form->input('InvoiceItem.'.$i.'.quantity', array('label' => false, 'class' => 'span1')); ?></td>
+			<td id="lineItem<?php echo $i; ?>Total" class="lineTotal"> 0.00 </td>
+      </tr>
+	  <?php
+	  }
+	  ?>
+	  
     </tbody>
   </table>
   <div class="invoiceTotal">
@@ -97,8 +153,8 @@
     <?php echo __('Notes &amp; Terms'); ?>
     </legend>
     <?php
-		echo $this->Form->input('Invoice.introduction', array('label' => 'Notes to client'));
-		echo $this->Form->input('Invoice.conclusion', array('label' => 'Terms'));
+		echo $this->Form->input('Invoice.introduction', array('label' => 'Notes to client', 'class'=>'span5', 'div' => array('class'=>'span5')));
+		echo $this->Form->input('Invoice.conclusion', array('label' => 'Terms', 'class'=>'span5', 'div' => array('class'=>'span5')));
 	?>
   </fieldset>
   <?php echo $this->Form->end('Submit');?> </div>

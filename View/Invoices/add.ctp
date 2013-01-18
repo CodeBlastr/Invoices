@@ -17,6 +17,9 @@
 	?>
   </fieldset>
   <table class="invoiceTimeLines">
+	  <tr>
+		  <th colspan="6">Hourly Items</th>
+	  </tr>
     <tr>
       <th>&nbsp;</th>
       <th>Task</th>
@@ -27,17 +30,24 @@
     </tr>
     <tbody class="invoiceTimes">
       <tr id="line0Time" class="invoiceTimeLine timeRow">
-      	<td><a class="newTimelink" href="#">New</a>, <a href="#" id="line0Time" class="deleteTimeLink">Delete</a></td>
+      	<td>
+			<a class="newTimelink btn-mini btn-primary" href="#">New</a>
+			<a href="#" id="line0Time" class="deleteTimeLink btn-mini btn-danger">Delete</a>
+			<?php //echo $this->Form->input('InvoiceTime.0.reusable', array('type' => 'checkbox')) ?>
+		</td>
         <td><?php echo $this->Form->input('InvoiceTime.0.name', array('label' => false)); ?></td>
         <td ><?php echo $this->Form->input('InvoiceTime.0.notes', array('type' => 'text', 'label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceTime.0.rate', array('label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceTime.0.hours', array('label' => false)); ?></td>
+        <td><?php echo $this->Form->input('InvoiceTime.0.rate', array('label' => false, 'class' => 'span1')); ?></td>
+        <td><?php echo $this->Form->input('InvoiceTime.0.hours', array('label' => false, 'class' => 'span1')); ?></td>
         <td id="lineTime0Total" class="lineTotal"> 0.00 </td>
         <td></td>
       </tr>
     </tbody>
   </table>
   <table class="invoiceItemLines">
+	  <tr>
+		  <th colspan="6">Flat-Rate Items</th>
+	  </tr>
     <tr>
       <th>&nbsp;</th>
       <th>Item</th>
@@ -48,14 +58,19 @@
     </tr>
     <tbody class="invoiceItems">
       <tr id="line0Item" class="invoiceItemLine itemRow">
-      	<td><a class="newItemlink" href="#">New</a>, <a href="#" id="line0Item" class="deleteItemLink">Delete</a></td>
+      	<td>
+			<a class="newItemlink btn-mini btn-primary" href="#">New</a>
+			<a href="#" id="line0Item" class="deleteItemLink btn-mini btn-danger">Delete</a>
+			<?php echo $this->Form->input('InvoiceItem.0.reusable', array('type' => 'checkbox')) ?>
+		</td>
         <td><?php echo $this->Form->input('InvoiceItem.0.name', array('label' => false)); ?></td>
         <td><?php echo $this->Form->input('InvoiceItem.0.description', array('type' => 'text', 'label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceItem.0.unit_cost', array('label' => false)); ?></td>
-        <td><?php echo $this->Form->input('InvoiceItem.0.quantity', array('label' => false)); ?></td>
+        <td><?php echo $this->Form->input('InvoiceItem.0.unit_cost', array('label' => false, 'class' => 'span1')); ?></td>
+        <td><?php echo $this->Form->input('InvoiceItem.0.quantity', array('label' => false, 'class' => 'span1')); ?></td>
         <td id="lineItem0Total" class="lineTotal"> 0.00 </td>
       </tr>
     </tbody>
+	
   </table>
   <div class="invoiceTotal">
     <ul id="totals">
@@ -82,5 +97,5 @@ $this->set('context_menu', array('menus' => array(
 			)
 		),
 	))); ?>
-<?php echo $this->Html->script('/js/jquery.formmodifier.js');?>
+<?php echo $this->Html->script('/js/plugins/jquery.formmodifier.js');?>
 <?php echo $this->Html->script('/invoices/invoice.js');?>

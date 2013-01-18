@@ -68,6 +68,7 @@ class Invoice extends AppModel {
 		)
 	);
 	
+	
 	public function add($data) {
 		$data = $this->cleanData($data);
 		
@@ -75,13 +76,15 @@ class Invoice extends AppModel {
 			return true;
 		} else {
 			$error = 'Error : ';
-			foreach ($this->invalidFields() as $models) :
-				if (is_array($models)) : foreach ($models as $err) :
-					$error .= $err . ', ';
-				endforeach; else :
+			foreach ($this->invalidFields() as $models) {
+				if (is_array($models)) {
+					foreach ($models as $err) {
+						$error .= $err . ', ';
+					}
+				} else {
 					$error .= $models;
-				endif;
-			endforeach;
+				}
+			}
 			throw new Exception($error);
 		}
 	}
@@ -121,6 +124,20 @@ class Invoice extends AppModel {
 			unset($data['InvoiceTime']);
 		}
 		
+//		// Duplicate and format Reusable Items.
+//		// We are making a template from the Item they submitted as reusable.
+//		if ( !empty($data['InvoiceItem']) ) {
+//			$i = 0;
+//			foreach ($data['InvoiceItem'] as $invoiceItem) {
+//				if ( $invoiceItem['is_reusable'] ) {
+//					$reusableInvoiceItem = $invoiceItem;
+//					$data['InvoiceItem'][] = $reusableInvoiceItem; // this one will be the template
+//					$data['InvoiceItem'][$i]['is_reusable'] = 0;
+//				}
+//				++$i;
+//			}
+//		}
+		
 		// make a name for the invoice
 		if (empty($data['Invoice']['name']) && !empty($data['Invoice']['contact_id'])) {
 			$contact = $this->Contact->find('first', array('conditions' => array('Contact.id' => $data['Invoice']['contact_id'])));
@@ -158,4 +175,22 @@ class Invoice extends AppModel {
 		return $data;
 	}
 
+/**
+ * Duplicate and format Reusable Items.
+ * We are making a template from the Item they submitted as reusable.
+ * @param array $data
+ */
+//	public function disassociateReusableItems($data) {
+//		if ( !empty($data['InvoiceItem']) ) {
+//			$i = 0;
+//			foreach ($data['InvoiceItem'] as $invoiceItem) {
+//				if ( $invoiceItem['is_reusable'] ) {
+//					$data['InvoiceItem'][$i]['invoice_id'] = null;
+//				}
+//				++$i;
+//			}
+//			$this->InvoiceItem->saveAll($data);
+//		}
+//	}
+	
 }

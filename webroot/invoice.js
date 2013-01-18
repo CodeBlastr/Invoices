@@ -35,6 +35,23 @@ $(document).ready(function() {
 			});
 			$('.invoiceItems').data('FormModifier').appendRow();		
 		});
+	
+	$('.newReuseItemlink').live('click', function(e) {
+		   e.preventDefault();		   
+			$('.reusableItems').FormModifier({
+				actionElem		:		'.newReuseItemlink',
+				cloneElem		:		'.reusableItems',
+				cloneRow		:		true,
+				isParent		:		true,
+				labelPrefix		:		null,
+				labelDiv		:		'',
+				child			:		'.itemRow',
+				formid			:		'InvoiceAddForm',
+				canDeleteLast	:		false,
+				appendTo		:		'reusableItemLine'
+			});
+			$('.reusableItems').data('FormModifier').appendRow();		
+		});
 
 	$('.deleteTimeLink').live('click', function(e) {
 		   e.preventDefault();		   
@@ -69,13 +86,38 @@ $(document).ready(function() {
 			});
 			$('#' + $(this).attr('id')).data('FormModifier').deleteRow();		
 	});
+
+	$('.deleteReuseItemLink').live('click', function(e) {
+		   e.preventDefault();		   
+			$('#' + $(this).attr('id')).FormModifier({
+				actionElem		:		'.deleteItemLink',
+				cloneElem		:		'#' + $(this).attr('id'),
+				cloneRow		:		true,
+				isParent		:		true,
+				labelPrefix		:		null,
+				labelDiv		:		'',
+				child			:		'.timeRow',
+				formid			:		'InvoiceAddForm',
+				canDeleteLast	:		true,
+				appendTo		:		'reusableItemLine'
+			});
+			$('#' + $(this).attr('id')).data('FormModifier').deleteRow();		
+	});
+	
+	// reusable
+	$(".reusableSelect").change(function() {
+	  var idNumber = $(this).attr('id');
+	  idNumber = idNumber.replace(eval("/InvoiceItem|Name/ig"), '');
+	  $("#InvoiceItem"+idNumber+"Description").val( $("#reusableDesc_"+idNumber).html() );
+	  $("#InvoiceItem"+idNumber+"UnitCost").val( $("#reusableUnit_"+idNumber).html() );
+	});
 	
 	// handle the calculations
-	$(".invoiceTimeLines").keyup(function() {
+	$(".invoiceTimeLines").bind("keyup change", function(e) {
 		calculateTimeLine();
 		calculateTotal();
 	});
-	$(".invoiceItemLines").keyup(function() {
+	$(".invoiceItemLines").bind("keyup change", function(e) {
 		calculateItemLine();
 		calculateTotal();
 	});

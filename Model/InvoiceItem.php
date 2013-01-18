@@ -25,4 +25,23 @@ class InvoiceItem extends AppModel {
 			'order' => ''
 		)
 	);
+	
+	
+	public function beforeSave($options = array()) {
+		if (!empty($this->data['InvoiceItem']['is_reusable'])) {
+			$this->reusableItem = $this->data;
+			$this->data['InvoiceItem']['is_reusable'] = '0';
+		}
+		return parent::beforeSave($options);
+	}
+	
+	public function afterSave($created) {
+		if (!empty($this->reusableItem)) {
+			$this->reusableItem['InvoiceItem']['id'] = null;
+			$this->reusableItem['InvoiceItem']['invoice_id'] = null;
+			$this->create();
+			$this->save($this->reusableItem, array('callbacks' => false)); // template version of invoice item
+		}
+		return parent::afterSave($created);
+	}
 }
