@@ -39,6 +39,7 @@ class InvoiceItem extends AppModel {
 		if (!empty($this->reusableItem)) {
 			$this->reusableItem['InvoiceItem']['id'] = null;
 			$this->reusableItem['InvoiceItem']['invoice_id'] = null;
+			$this->reusableItem['InvoiceItem']['creator_id'] = CakeSession::read('Auth.User.id');
 			$this->create();
 			$this->save($this->reusableItem, array('callbacks' => false)); // template version of invoice item
 		}
