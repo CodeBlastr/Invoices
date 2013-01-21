@@ -9,8 +9,17 @@
 		if (!empty($this->request->params['named']['contact_id'])) {
 			echo $this->Form->input('Invoice.contact_id', array('type' => 'hidden', 'value' => $this->request->params['named']['contact_id']));
 		} else {
-			echo $this->Form->input('Invoice.contact_id', array('empty' => '-- Optional --', 'label' => 'Which client? <small>(or '.$this->Html->link('create a new company', array('plugin' => 'contacts', 'controller' => 'contacts', 'controller' => 'contacts', 'action' => 'add', 'company')).')</small>', 'after' => '<br /><br /><br />'.$this->Form->checkbox('Invoice.contact_all_access', array('checked' => 'checked')).' Give everyone at this company access to this invoice?'));
+			//echo $this->Form->input('Invoice.contact_id', array('empty' => '-- Optional --', 'label' => 'Which client? <small>(or '.$this->Html->link('create a new company', array('plugin' => 'contacts', 'controller' => 'contacts', 'controller' => 'contacts', 'action' => 'add', 'company')).')</small>', 'after' => '<br /><br /><br />'.$this->Form->checkbox('Invoice.contact_all_access', array('checked' => 'checked')).' Give everyone at this company access to this invoice?'));
+			echo $this->Form->input('Invoice.contact_id', array(
+				'empty' => '-- Optional --',
+				'label' => 'Which client? <small>( or '.$this->Html->link('create a new company', array('plugin' => 'contacts', 'controller' => 'contacts', 'controller' => 'contacts', 'action' => 'add', 'company'), array('class' => 'toggleClick', 'data-target' => '#ContactNameDiv')).')</small>',
+				'after' => '&nbsp;'.$this->Form->checkbox('Invoice.contact_all_access', array('checked' => 'checked')).' Give everyone at this company access to this invoice?'
+				));
+			//echo $this->Form->checkbox('Invoice.contact_all_access', array('checked' => 'checked', 'label'=>'Give everyone at this company access to this invoice?'));
 		}
+		echo $this->Form->input('Contact.name', array('label' => 'Company Name', 'div' => array('id' => 'ContactNameDiv')));
+		echo $this->Form->input('Contact.is_company', array('type' => 'hidden', 'value' => 1));
+		
 		echo $this->Form->input('Invoice.number', array('value' => $invoiceNumber, 'label' => 'Invoice Number'));
 		#echo $this->Form->input('Invoice.po_number', array('label' => 'PO Number'));
 		echo $this->Form->input('Invoice.due_date', array('value' => $dueDate));
