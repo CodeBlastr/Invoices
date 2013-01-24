@@ -80,7 +80,49 @@
 		
 		<?php if ( $invoice['Invoice']['status'] !== 'paid' ) { ?>
         <div id="invoicePayButton">
-			<a href="https://www.razorit.com/checkout/?a=<?php echo number_format($invoice['Invoice']['balance'], 2, '.', ''); ?>" class="button btn btn-primary">Enter Payment on Invoice</a>
+<!--			<a href="https://www.razorit.com/checkout/?a=<?php echo number_format($invoice['Invoice']['balance'], 2, '.', ''); ?>" class="button btn btn-primary">Enter Payment on Invoice</a>-->
+			
+			<?php
+			echo $this->Form->create(null, array('url' => '/transactions/transaction_items/add'));
+			echo '<label for="TransactionItemPrice">Amount</label>';
+			echo '<div class="input-prepend">';
+			echo '<span class="add-on" style="color:#333">$</span>';
+			echo $this->Form->input('TransactionItem.price', array('label'=>false, 'value' => number_format($invoice['Invoice']['balance'], 2, '.', ''), 'class' => 'span2', 'div'=>false));
+			echo '</div>';
+			echo $this->Form->hidden('TransactionItem.model', array('value' => 'Invoice'));
+			echo $this->Form->hidden('TransactionItem.foreign_key', array('value' => $invoice['Invoice']['id']));
+
+			//echo $this->Form->hidden('TransactionItem.arb_settings.PaymentAmount', array('value' => $task['Task']['assignee_id']));
+
+//			$arbSettingsValues = array(
+//				array(
+//					'name' => 'ExecutionFrequencyType',
+//					'desc' => 'The frequency to execute the schedule.'
+//								.'<br />"Daily", "Weekly", "BiWeekly", "FirstofMonth", "SpecificDayofMonth", "LastofMonth", "Quarterly", "SemiAnnually", "Annually"',
+//					),
+//				array(
+//					'name' => 'ExecutionFrequencyParameter',
+//					'desc' => 'The execution frequency parameter specifies the day of month for a SpecificDayOfMonth frequency or specifies day of week for Weekly or BiWeekly schedule.'
+//					.'<br />It is required when ExecutionFrequncyType is SpecificDayofMonth, Weekly or BiWeekly.'
+//					.'<br />"Sunday" ... "Saturday"',
+//					),
+//			);
+//
+//			echo $this->Form->input('TransactionItem.arb_settings.ExecutionFrequencyType', array(
+//				'label' => 'Repetition of Payment',
+//				'options' => array("Weekly"=>"Weekly", "BiWeekly"=>"Bi-Weekly", "FirstofMonth"=>"First of the Month", "LastofMonth"=>"Last of the Month", "Quarterly"=>"Quarterly", "SemiAnnually"=>"Semi-Annually", "Annually"=>"Annually"),
+//				'empty' => 'One-Time'
+//			));
+//			echo $this->Form->input('TransactionItem.arb_settings.ExecutionFrequencyParameter', array(
+//				'label' => 'Day of Payment',
+//				'options' => array("Sunday"=>"Sunday", "Monday"=>"Monday", "Tuesday"=>"Tuesday", "Wednesday"=>"Wednesday", "Thursday"=>"Thursday", "Friday"=>"Friday", "Saturday"=>"Saturday"),
+//				'empty' => '(choose one)'
+//			));
+
+			echo $this->Form->submit('Enter Payment on Invoice', array('class' => 'button btn btn-primary'));
+			echo $this->Form->end();
+			?>
+			
 		</div>
 		<?php } ?>
 		
