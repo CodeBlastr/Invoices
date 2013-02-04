@@ -119,7 +119,11 @@
 //				'empty' => '(choose one)'
 //			));
 
-			echo $this->Form->submit('Enter Payment on Invoice', array('class' => 'button btn btn-primary'));
+            if ($_SERVER['HTTP_HOST'] == 'www2.razorit.com') {
+                echo $this->Html->link('Enter Payment on Invoice', 'https://www.razorit.com/checkout/?a='.number_format($invoice['Invoice']['balance'], 2, '.', ''), array('class' => 'btn btn-primary'));
+            } else {
+			    echo $this->Form->submit('Enter Payment on Invoice', array('class' => 'button btn btn-primary'));
+            }
 			echo $this->Form->end();
 			?>
 			
