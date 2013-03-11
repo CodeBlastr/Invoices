@@ -167,7 +167,7 @@ class InvoicesController extends AppController {
 					),
 				));
 			
-			$data['Invoice']['name'] = strip_tags($project['Project']['displayName']) . ' ' . $this->_generateInvoiceNumber();
+			$data['Invoice']['name'] = strip_tags($project['Project']['name']) . ' ' . $this->_generateInvoiceNumber();
 			$data['Invoice']['number'] = $this->_generateInvoiceNumber();
 			$data['Invoice']['status'] = 'unpaid';
 			$data['Invoice']['introduction'] = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
@@ -225,7 +225,7 @@ class InvoicesController extends AppController {
 					),
 				'fields' => array(
 					'Project.id',
-					'Project.displayName',
+					'Project.name',
 					'Project.contact_id',
 					),
 				));

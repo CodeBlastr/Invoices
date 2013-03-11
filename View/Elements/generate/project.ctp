@@ -12,7 +12,7 @@ $i=0; foreach ($projects as $project) :
 	<div class="invoiceProjects contact<?php echo $project['Project']['contact_id']; ?>">
 <?php
 	echo $this->Form->checkbox('Invoice.project_id.'.$i, array('value' => $project['Project']['id']));
-	echo '<span class="projectDisplayName">' . $project['Project']['displayName'] . '</span>';
+	echo '<span class="projectDisplayName">' . $project['Project']['name'] . '</span>';
 	echo !empty($project['Invoice'][0]['created']) ? '<span class="lastInvoiceDate"> Last Invoice : ' . $this->Time->niceShort($project['Invoice'][0]['created']) . '</span>' : '';
 ?>
 	</div>
