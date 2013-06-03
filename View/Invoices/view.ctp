@@ -80,8 +80,6 @@
 		
 		<?php if ( $invoice['Invoice']['status'] !== 'paid' ) { ?>
         <div id="invoicePayButton">
-<!--			<a href="https://www.razorit.com/checkout/?a=<?php echo number_format($invoice['Invoice']['balance'], 2, '.', ''); ?>" class="button btn btn-primary">Enter Payment on Invoice</a>-->
-			
 			<?php
 			echo $this->Form->create(null, array('url' => '/transactions/transaction_items/add'));
 			echo '<label for="TransactionItemPrice">Amount</label>';
@@ -120,7 +118,7 @@
 //			));
 
             if ($_SERVER['HTTP_HOST'] == 'www2.razorit.com') {
-                echo $this->Html->link('Enter Payment on Invoice', 'https://www.razorit.com/checkout/?a='.number_format($invoice['Invoice']['balance'], 2, '.', ''), array('class' => 'btn btn-primary'));
+                echo $this->Html->link('Enter Payment on Invoice', 'https://buildrr.com/checkout/?a='.number_format($invoice['Invoice']['balance'], 2, '.', ''), array('class' => 'btn btn-primary'));
             } else {
 			    echo $this->Form->submit('Enter Payment on Invoice', array('class' => 'button btn btn-primary'));
             }
