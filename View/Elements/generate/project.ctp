@@ -19,8 +19,8 @@
 	</div>
 	<?php
 	echo $this->Form->input('rate', array('label' => 'Hourly Rate'));
-	echo $this->Form->input('start_date', array('type' => 'date'));
-	echo $this->Form->input('end_date', array('type' => 'date'));
+	echo $this->Form->input('start_date', array('type' => 'text', 'class' => 'datepicker'));
+	echo $this->Form->input('end_date', array('type' => 'text', 'class' => 'datepicker'));
 	echo $this->Form->end('Generate'); ?>
 </div>
 
