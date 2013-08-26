@@ -90,7 +90,7 @@ class InvoicesController extends AppController {
 		}
 		
 		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
-		$invoiceNumber = $this->_generateInvoiceNumber();
+		$invoiceNumber = $this->Invoice->generateInvoiceNumber();
 		$dueDate = date('Y-m-d');
 		$defaultIntroduction = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
 		$defaultConclusion = defined('__INVOICES_DEFAULT_CONCLUSION') ? __INVOICES_DEFAULT_CONCLUSION : '';
@@ -151,50 +151,13 @@ class InvoicesController extends AppController {
  */
 	public function generate($type = 'project') {
 		if (!empty($this->request->data)) {
-			$projectIds = array_values(array_filter($this->request->data['Invoice']['project_id'])); //reindex & filter zero values
-			$project = $this->Invoice->Project->find('first', array('conditions' => array('Project.id' => $projectIds[0])));
-			$conditions['TimesheetTime.project_id'] = $projectIds;
-			$conditions['TimesheetTime.started_on >='] = !empty($this->request->data['Invoice']['start_date']) ? $this->request->data['Invoice']['start_date'] : '0000-00-00 00:00:00';
-			$conditions['TimesheetTime.started_on <='] = !empty($this->request->data['Invoice']['end_date']) ? date('Y-m-d 99:99:99', strtotime($this->request->data['Invoice']['end_date'])) : '9999-99-99 99:99:99';
-			$times = $this->Invoice->Project->TimesheetTime->find('all', array(
-				'conditions' => $conditions,
-				'contain' => array(
-					'Task',
-					'ProjectIssue',
-					),
-				'order' => array(
-					'TimesheetTime.created DESC',
-					),
-				));
-			
-			$data['Invoice']['name'] = strip_tags($project['Project']['name']) . ' ' . $this->_generateInvoiceNumber();
-			$data['Invoice']['number'] = $this->_generateInvoiceNumber();
-			$data['Invoice']['status'] = 'unpaid';
-			$data['Invoice']['introduction'] = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
-			$data['Invoice']['conclusion'] = defined('__INVOICES_DEFAULT_CONCLUSION') ? __INVOICES_DEFAULT_CONCLUSION : '';
-			$data['Invoice']['due_date'] = date('Y-m-d');
-			$data['Invoice']['contact_id'] = $this->request->data['Invoice']['contact_id'];
-			$data['Invoice']['project_id'] = $projectIds[0]; // didn't think ahead for having an invoice relate to multiple projects (but I really don't want to create another new habtm db table in order to just relate invoices to projects)
-			$rate = defined('__INVOICES_DEFAULT_RATE') ? __INVOICES_DEFAULT_RATE : '0';
-			$rate = !empty($this->request->data['Invoice']['rate']) ? $this->request->data['Invoice']['rate'] : '0'; // over write default if provided
-			
-			$i=0; 
-			$total=0; 
-			foreach ($times as $invTime) {
-				$data['InvoiceTime'][$i]['name'] = !empty($invTime['Task']['name']) ? $invTime['Task']['name'] : $invTime['ProjectIssue']['name'];  // support the deprecated project_issues table
-				$data['InvoiceTime'][$i]['notes'] = date('M j, Y', strtotime($invTime['TimesheetTime']['created'])) . ', ' .$invTime['TimesheetTime']['comments'];
-				$data['InvoiceTime'][$i]['rate'] = $rate;
-				$data['InvoiceTime'][$i]['hours'] = $invTime['TimesheetTime']['hours'];
-				$data['InvoiceTime'][$i]['project_id'] = $projectIds[0];
-				$data['InvoiceTime'][$i]['task_id'] = $invTime['Task']['id'];
-				$data['InvoiceTime'][$i]['time_id'] = $invTime['TimesheetTime']['id'];
-				$data['InvoiceTime'][$i]['created'] = $invTime['TimesheetTime']['created'];
-				$lineTotal = $rate * $invTime['TimesheetTime']['hours'];
-				$total =  $total + $lineTotal;
-				$i++;
+
+			switch ($type) {
+				case 'project':
+				case 'timesheet':
+					$data = $this->Invoice->generateTimeBasedInvoice($this->request->data);
+					break;
 			}
-			$data['Invoice']['total'] = $total;
-			$data['Invoice']['balance'] = $total;
 						
 			if ($this->Invoice->add($data)) {
 				$this->Session->setFlash(__('Invoice generated', true));
@@ -202,35 +165,28 @@ class InvoicesController extends AppController {
 			} else { 
 				$this->Session->setFlash(__('Invoice generation failed.', true));
 			}
+
 		}
-		
-		if ($type == 'timesheet') {
-			$this->set('element', 'generate/timesheet');
-		} else {
-			$contacts = $this->Invoice->Project->findContactsWithProjects('list');
-			$projects = $this->Invoice->Project->find('all', array(
-				'contain' => array(
-					'Invoice' => array(
-						'fields' => array(
-							'Invoice.id',
-							'Invoice.created',
-							'Invoice.project_id',
-							'Invoice.contact_id',
+
+		switch ($type) {
+			case 'project':
+				$contacts = $this->Invoice->Project->findContactsWithProjects('list');
+				$projects = $this->Invoice->Project->find('all', array(
+					'contain' => array(
+						'Invoice' => array(
+							'fields' => array('Invoice.id', 'Invoice.created', 'Invoice.project_id', 'Invoice.contact_id'),
+							'order' => array('created' => 'DESC'),
+							'limit' => 1,
 							),
-						'order' => array(
-							'created' => 'DESC',
-							),
-						'limit' => 1,
 						),
-					),
-				'fields' => array(
-					'Project.id',
-					'Project.name',
-					'Project.contact_id',
-					),
-				));
-			$this->set(compact('contacts', 'projects'));
-			$this->set('element', 'generate/project');
+					'fields' => array('Project.id', 'Project.name', 'Project.contact_id'),
+					));
+				$this->set(compact('contacts', 'projects'));
+				$this->set('element', 'generate/project');
+				break;
+			case 'timesheet':
+				$this->set('element', 'generate/timesheet');
+				break;
 		}
 	}
 	
@@ -297,9 +253,6 @@ class InvoicesController extends AppController {
 		$this->request->data['Invoice']['message'] =  str_replace('{viewLink}', $url, $message['template'][0]); // temporary till we setup multi templates
 	}
 	
-	public function _generateInvoiceNumber() {
-		return str_pad($this->Invoice->find('count') + 1, 7, '0', STR_PAD_LEFT);
-	}
 	
 	public function dashboard() {
 	}

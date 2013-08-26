@@ -175,7 +175,63 @@ class Invoice extends AppModel {
 		return $data;
 	}
 
-	
+
+/**
+ * Used to generate Invoice data from Projects and Timesheets
+ * @param array $requestData
+ * @return array Invoice data to be saved
+ */
+	public function generateTimeBasedInvoice($requestData) {
+		$data = null;
+		$projectIds = array_values(array_filter($requestData['Invoice']['project_id'])); //reindex & filter zero values
+		$project = $this->Project->find('first', array('conditions' => array('Project.id' => $projectIds[0])));
+		$conditions['TimesheetTime.project_id'] = $projectIds;
+		$conditions['TimesheetTime.started_on >='] = !empty($requestData['Invoice']['start_date']) ? $requestData['Invoice']['start_date'] : '0000-00-00 00:00:00';
+		$conditions['TimesheetTime.started_on <='] = !empty($requestData['Invoice']['end_date']) ? date('Y-m-d 99:99:99', strtotime($requestData['Invoice']['end_date'])) : '9999-99-99 99:99:99';
+		$times = $this->Project->TimesheetTime->find('all', array(
+			'conditions' => $conditions,
+			'contain' => array(
+				'Task',
+				'ProjectIssue',
+			),
+			'order' => array(
+				'TimesheetTime.created DESC',
+			),
+		));
+
+		$data['Invoice']['name'] = strip_tags($project['Project']['name']) . ' ' . $this->generateInvoiceNumber();
+		$data['Invoice']['number'] = $this->generateInvoiceNumber();
+		$data['Invoice']['status'] = 'unpaid';
+		$data['Invoice']['introduction'] = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
+		$data['Invoice']['conclusion'] = defined('__INVOICES_DEFAULT_CONCLUSION') ? __INVOICES_DEFAULT_CONCLUSION : '';
+		$data['Invoice']['due_date'] = date('Y-m-d');
+		$data['Invoice']['contact_id'] = $requestData['Invoice']['contact_id'];
+		$data['Invoice']['project_id'] = $projectIds[0]; // didn't think ahead for having an invoice relate to multiple projects (but I really don't want to create another new habtm db table in order to just relate invoices to projects)
+		$rate = defined('__INVOICES_DEFAULT_RATE') ? __INVOICES_DEFAULT_RATE : '0';
+		$rate = !empty($requestData['Invoice']['rate']) ? $requestData['Invoice']['rate'] : '0'; // over write default if provided
+
+		$i = 0;
+		$total = 0;
+		foreach ( $times as $invTime ) {
+			$data['InvoiceTime'][$i]['name'] = !empty($invTime['Task']['name']) ? $invTime['Task']['name'] : $invTime['ProjectIssue']['name'];  // support the deprecated project_issues table
+			$data['InvoiceTime'][$i]['notes'] = date('M j, Y', strtotime($invTime['TimesheetTime']['created'])) . ', ' . $invTime['TimesheetTime']['comments'];
+			$data['InvoiceTime'][$i]['rate'] = $rate;
+			$data['InvoiceTime'][$i]['hours'] = $invTime['TimesheetTime']['hours'];
+			$data['InvoiceTime'][$i]['project_id'] = $projectIds[0];
+			$data['InvoiceTime'][$i]['task_id'] = $invTime['Task']['id'];
+			$data['InvoiceTime'][$i]['time_id'] = $invTime['TimesheetTime']['id'];
+			$data['InvoiceTime'][$i]['created'] = $invTime['TimesheetTime']['created'];
+			$lineTotal = $rate * $invTime['TimesheetTime']['hours'];
+			$total = $total + $lineTotal;
+			$i++;
+		}
+		$data['Invoice']['total'] = $total;
+		$data['Invoice']['balance'] = $total;
+
+		return $data;
+	}
+
+
 /**
  * This trims an object, formats it's values if you need to, and returns the data to be merged with the Transaction data.
  * It is a required function for models that will be for sale via the Transactions Plugin.
