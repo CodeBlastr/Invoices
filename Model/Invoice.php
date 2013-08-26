@@ -176,6 +176,53 @@ class Invoice extends AppModel {
 	}
 
 
+	public function generateTransactionInvoice($requestData) {
+		$data = null;
+
+		App::uses('Transaction', 'Transactions.Model');
+		$Transaction = new Transaction;
+		$transaction = $Transaction->find('first', array(
+			'conditions' => array('Transaction.id' => $requestData['Transaction']['id']),
+			'contain' => array(
+				'TransactionItem' => array(
+					'order' => array('TransactionItem.name' => 'ASC')
+				)
+			)
+		));
+
+		App::uses('User', 'Users.Model');
+		$User = new User;
+		$user = $User->find('first', array(
+			'conditions' => array('User.id' => $transaction['Transaction']['customer_id']),
+			'contain' => array(
+				'Contact' => array(
+					'ContactAddress'
+				)
+			)
+		));
+
+		$data['Invoice']['name'] = strip_tags($project['Project']['name']) . ' ' . $this->generateInvoiceNumber();
+		$data['Invoice']['number'] = $this->generateInvoiceNumber();
+		$data['Invoice']['status'] = 'unpaid';
+		$data['Invoice']['introduction'] = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
+		$data['Invoice']['conclusion'] = defined('__INVOICES_DEFAULT_CONCLUSION') ? __INVOICES_DEFAULT_CONCLUSION : '';
+		$data['Invoice']['due_date'] = date('Y-m-d');
+		$data['Invoice']['contact_id'] = $user['Contact']['id'];
+
+		foreach ( $transaction['TransactionItem'] as $transactionItem ) {
+			$data['InvoiceItem'][] = array(
+				'name' => $transactionItem['name'],
+				'cost' => $transactionItem['price'],
+				'quantity' => $transactionItem['quantity']
+			);
+		}
+
+		$data['Invoice']['total'] = $data['Invoice']['balance'] = $transaction['TransactionItem']['total'];
+
+		return $data;
+	}
+
+
 /**
  * Used to generate Invoice data from Projects and Timesheets
  * @param array $requestData
@@ -229,6 +276,11 @@ class Invoice extends AppModel {
 		$data['Invoice']['balance'] = $total;
 
 		return $data;
+	}
+
+
+	public function generateInvoiceNumber() {
+		return str_pad($this->find('count') + 1, 7, '0', STR_PAD_LEFT);
 	}
 
 

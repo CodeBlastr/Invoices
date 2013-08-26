@@ -157,6 +157,10 @@ class InvoicesController extends AppController {
 				case 'timesheet':
 					$data = $this->Invoice->generateTimeBasedInvoice($this->request->data);
 					break;
+
+				case 'transaction':
+					$data = $this->Invoice->generateTransactionInvoice($this->request->data);
+					break;
 			}
 						
 			if ($this->Invoice->add($data)) {
@@ -186,6 +190,10 @@ class InvoicesController extends AppController {
 				break;
 			case 'timesheet':
 				$this->set('element', 'generate/timesheet');
+				break;
+
+			case 'transaction':
+				$this->set('element', 'generate/transaction');
 				break;
 		}
 	}
