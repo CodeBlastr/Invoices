@@ -14,6 +14,7 @@
 				//'after' => '&nbsp;'.$this->Form->checkbox('Project.contact_all_access', array('checked' => 'checked')).' Give everyone at this company access to this project?'
 				));
 		}
+		echo $this->Form->input('Invoice.name');
 		echo $this->Form->input('Invoice.number', array('label' => 'Invoice Number'));
 		#echo $this->Form->input('Invoice.po_number', array('label' => 'PO Number'));
 		echo $this->Form->input('Invoice.due_date');
