@@ -39,7 +39,7 @@
 			            <td><?php echo $invoiceItem['description']; ?></td>
 			            <td><?php echo $invoiceItem['unit_cost']; ?></td>
 			            <td><?php echo $invoiceItem['quantity']; ?></td>
-			            <td><?php echo ZuhaInflector::pricify($invoiceItem['unit_cost'] * $invoiceItem['quantity']); ?></td>
+			            <td class="text-right"><?php echo number_format($invoiceItem['unit_cost'] * $invoiceItem['quantity'], 2, '.', ','); ?></td>
 		          	</tr>
 		          	<?php endforeach; ?>
 		      	<?php endif; ?>
@@ -57,27 +57,27 @@
 		              <p>Paid</p>
 		              <p>Balance</p></td>
 		            <td>&nbsp;</td>
-		            <td><p><?php echo ZuhaInflector::pricify($invoice['Invoice']['total']); ?></p>
-		              <p><?php echo ZuhaInflector::pricify($invoice['Invoice']['total'] - $invoice['Invoice']['balance']); ?></p>
-		              <p><?php echo ZuhaInflector::pricify($invoice['Invoice']['balance']); ?></p></td>
+		            <td>
+		            	<p class="text-right">$<?php echo number_format($invoice['Invoice']['total'], 2, '.', ','); ?></p>
+		              	<p class="text-right">$<?php echo number_format($invoice['Invoice']['total'] - $invoice['Invoice']['balance'], '2', '.', ','); ?></p>
+		              	<p class="text-right">$<?php echo number_format($invoice['Invoice']['balance'], 2, '.', ','); ?></p>
+					</td>
 	          	</tr>
 			</table>
 		</div>
 		
 		<?php if ( $invoice['Invoice']['status'] !== 'paid' ) { ?>
-        <div id="invoicePayButton">
+        <div id="invoicePayButton" class="text-right">
 			<?php
-			echo $this->Form->create(null, array('url' => '/transactions/transaction_items/add'));
-			echo '<label for="TransactionItemPrice">Amount</label>';
-			echo '<div class="input-prepend">';
-			echo '<span class="add-on" style="color:#333">$</span>';
-			echo $this->Form->input('TransactionItem.price', array(
-				'label' => false,
-				'value' => number_format($invoice['Invoice']['balance'], 2, '.', ''),
-				'class' => 'span2',
-				'div' => false
-			));
-			echo '</div>';
+			echo $this->Form->create(null, array('url' => '/transactions/transaction_items/add', 'class' => 'form-inline'));
+			// echo $this->Form->input('TransactionItem.price', array(
+				// 'label' => false,
+				// 'value' => number_format($invoice['Invoice']['balance'], 2, '.', ''),
+				// 'class' => 'span2',
+				// 'div' => false,
+				// 'disabled' => 'disabled'
+			// ));
+			
 			echo $this->Form->hidden('TransactionItem.model', array('value' => 'Invoice'));
 			echo $this->Form->hidden('TransactionItem.foreign_key', array('value' => $invoice['Invoice']['id']));
 			//echo $this->Form->hidden('TransactionItem.arb_settings.PaymentAmount',
