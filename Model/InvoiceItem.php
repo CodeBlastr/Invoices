@@ -6,9 +6,14 @@ class InvoiceItem extends AppModel {
 	public $displayField = 'name';
 	
 	public $validate = array();
+        
+ /**
+  * Acts as
+  * 
+  * @var array
+  */
+    public $actsAs = array('Tree');
 	
-	//The Associations below have been created with all possible keys, those that are not needed can be removed
-
 	public $belongsTo = array(
 		'Invoice' => array(
 			'className' => 'Invoices.Invoice',

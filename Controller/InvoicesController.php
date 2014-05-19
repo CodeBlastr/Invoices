@@ -1,5 +1,7 @@
 <?php
-class InvoicesController extends AppController {
+App::uses('InvoicesAppController', 'Invoices.Controller');
+
+class AppInvoicesController extends InvoicesAppController {
 
 /**
  * Name
@@ -7,7 +9,9 @@ class InvoicesController extends AppController {
  * var string
  */
 	public $name = 'Invoices';
+
 	public $uses = 'Invoices.Invoice';
+
 	public $order = array('number', 'due_date');
 
 	public function index($status = array('unpaid', 'partpaid')) {
@@ -79,16 +83,15 @@ class InvoicesController extends AppController {
 	}
 
 	public function add() {
-		if (!empty($this->request->data)) {
+		if ($this->request->is('post')) {
 			try {
-				$this->Invoice->add($this->request->data);
+				$this->Invoice->save($this->request->data);
 				$this->Session->setFlash(__('The invoice has been saved', true));
 				$this->redirect(array('action' => 'view', $this->Invoice->id));
 			} catch(Exception $e) {
 				$this->Session->setFlash($e->getMessage());
 			}
 		}
-		
 		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
 		$invoiceNumber = $this->Invoice->generateInvoiceNumber();
 		$dueDate = date('Y-m-d');
@@ -104,7 +107,7 @@ class InvoicesController extends AppController {
 		}
 		if (!empty($this->request->data)) {
 			try {
-				$this->Invoice->add($this->request->data);
+				$this->Invoice->save($this->request->data);
 				$this->Session->setFlash(__('The invoice has been saved', true));
 				$this->redirect(array('action' => 'view', $this->Invoice->id));
 			} catch(Exception $e) {
@@ -163,7 +166,7 @@ class InvoicesController extends AppController {
 					break;
 			}
 						
-			if ($this->Invoice->add($data)) {
+			if ($this->Invoice->save($data)) {
 				$this->Session->setFlash(__('Invoice generated', true));
 				$this->redirect(array('action' => 'edit', $this->Invoice->id));
 			} else { 
@@ -276,4 +279,8 @@ class InvoicesController extends AppController {
 		
 		$this->set( 'invoice', $this->Invoice->findById($id) );
 	}
+}
+
+if (!isset($refuseInit)) {
+	class InvoicesController extends AppInvoicesController {}
 }

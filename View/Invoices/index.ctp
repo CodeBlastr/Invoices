@@ -27,7 +27,8 @@ $this->set('context_menu', array('menus' => array(
 	array(
 		'heading' => 'Invoices',
 		'items' => array(
-			$this->Html->link(__('Paid'), array('controller' => 'invoices', 'action' => 'index', 'paid')),
+			$this->Html->link(__('List Paid'), array('controller' => 'invoices', 'action' => 'index', 'paid')),
+			$this->Html->link(__('Add'), array('controller' => 'invoices', 'action' => 'add')),
 			$this->Html->link(__('Generate'), array('controller' => 'invoices', 'action' => 'generate'))
 			)
 		)

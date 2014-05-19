@@ -1,15 +1,16 @@
 <?php
-class InvoiceItemsController extends AppController {
+class InvoiceItemsController extends InvoicesAppController {
 
 	public $name = 'InvoiceItems';
+
 	public $uses = 'Invoices.InvoiceItem';
 
-	function index() {
+	public function index() {
 		$this->InvoiceItem->recursive = 0;
 		$this->set('invoiceItems', $this->paginate());
 	}
 
-	function view($id = null) {
+	public function view($id = null) {
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid invoice item', true));
 			$this->redirect(array('action' => 'index'));
@@ -17,7 +18,7 @@ class InvoiceItemsController extends AppController {
 		$this->set('invoiceItem', $this->InvoiceItem->read(null, $id));
 	}
 
-	function add() {
+	public function add() {
 		if (!empty($this->request->data)) {
 			$this->InvoiceItem->create();
 			if ($this->InvoiceItem->save($this->request->data)) {
@@ -32,7 +33,7 @@ class InvoiceItemsController extends AppController {
 		$this->set(compact('invoices', 'products'));
 	}
 
-	function edit($id = null) {
+	public function edit($id = null) {
 		if (!$id && empty($this->request->data)) {
 			$this->Session->setFlash(__('Invalid invoice item', true));
 			$this->redirect(array('action' => 'index'));
@@ -53,7 +54,7 @@ class InvoiceItemsController extends AppController {
 		$this->set(compact('invoices', 'products'));
 	}
 
-	function delete($id = null) {
+	public function delete($id = null) {
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid id for invoice item', true));
 			$this->redirect(array('action'=>'index'));

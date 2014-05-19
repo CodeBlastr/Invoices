@@ -1,15 +1,16 @@
 <?php
-class InvoiceTimesController extends AppController {
+class InvoiceTimesController extends InvoicesAppController {
 
 	public $name = 'InvoiceTimes';
+
 	public $uses = 'Invoices.InvoiceTime';
 
-	function index() {
+	public function index() {
 		$this->InvoiceTime->recursive = 0;
 		$this->set('invoiceTimes', $this->paginate());
 	}
 
-	function view($id = null) {
+	public function view($id = null) {
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid invoice time', true));
 			$this->redirect(array('action' => 'index'));
@@ -17,8 +18,8 @@ class InvoiceTimesController extends AppController {
 		$this->set('invoiceTime', $this->InvoiceTime->read(null, $id));
 	}
 
-	function add() {
-		if (!empty($this->request->data)) {
+	public function add() {
+		if ($this->request->if('post')) {
 			$this->InvoiceTime->create();
 			if ($this->InvoiceTime->save($this->request->data)) {
 				$this->Session->setFlash(__('The invoice time has been saved', true));
@@ -34,7 +35,7 @@ class InvoiceTimesController extends AppController {
 		$this->set(compact('projects', 'tasks', 'invoices', 'times'));
 	}
 
-	function edit($id = null) {
+	public function edit($id = null) {
 		if (!$id && empty($this->request->data)) {
 			$this->Session->setFlash(__('Invalid invoice time', true));
 			$this->redirect(array('action' => 'index'));
@@ -57,7 +58,7 @@ class InvoiceTimesController extends AppController {
 		$this->set(compact('projects', 'tasks', 'invoices', 'times'));
 	}
 
-	function delete($id = null) {
+	public function delete($id = null) {
 		if (!$id) {
 			$this->Session->setFlash(__('Invalid id for invoice time', true));
 			$this->redirect(array('action'=>'index'));

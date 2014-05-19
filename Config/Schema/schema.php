@@ -3,10 +3,6 @@ class InvoicesSchema extends CakeSchema {
 
 	public $renames = array();
 
-	public function __construct($options = array()) {
-		parent::__construct();
-	}
-
 	public function before($event = array()) {
 		App::uses('UpdateSchema', 'Model'); 
 		$this->UpdateSchema = new UpdateSchema;
@@ -21,6 +17,9 @@ class InvoicesSchema extends CakeSchema {
 
 	public $invoice_items = array(
 		'id' => array('type' => 'string', 'null' => false, 'default' => NULL, 'length' => 36, 'key' => 'primary', 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
+		'parent_id' => array('type' => 'string', 'null' => true, 'default' => NULL, 'length' => 36, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
+		'lft' => array('type' => 'integer', 'null' => true, 'default' => NULL),
+		'rght' => array('type' => 'integer', 'null' => true, 'default' => NULL),
 		'name' => array('type' => 'string', 'null' => true, 'default' => NULL, 'length' => 150, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'description' => array('type' => 'text', 'null' => true, 'default' => NULL, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'unit_cost' => array('type' => 'float', 'null' => true, 'default' => '0'),
