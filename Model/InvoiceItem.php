@@ -6,6 +6,8 @@ class InvoiceItem extends AppModel {
 	public $displayField = 'name';
 	
 	public $validate = array();
+	
+	public $reusableItem = array();
         
  /**
   * Acts as
@@ -21,19 +23,13 @@ class InvoiceItem extends AppModel {
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
-		),
-		'Product' => array(
-			'className' => 'Products.Product',
-			'foreignKey' => 'foreign_key',
-			'conditions' => '',
-			'fields' => '',
-			'order' => ''
 		)
 	);
 	
 	
 	public function beforeSave($options = array()) {
-		if (!empty($this->data['InvoiceItem']['is_reusable'])) {
+		if (!empty($this->data['InvoiceItem']['is_reusable']) && !empty($this->data['InvoiceItem']['invoice_id'])) {
+			// only used when creating a reusable item at the same time as creating an invoice item 
 			$this->reusableItem = $this->data;
 			$this->data['InvoiceItem']['is_reusable'] = '0';
 		}

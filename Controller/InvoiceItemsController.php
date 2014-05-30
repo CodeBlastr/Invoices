@@ -6,16 +6,49 @@ class InvoiceItemsController extends InvoicesAppController {
 	public $uses = 'Invoices.InvoiceItem';
 
 	public function index() {
-		$this->InvoiceItem->recursive = 0;
-		$this->set('invoiceItems', $this->paginate());
+		$this->helpers[] = 'Utils.Tree'; 
+		$invoiceItems = $this->InvoiceItem->find('threaded', array('conditions' => array('InvoiceItem.is_reusable' => 1)));
+		$this->set('invoiceItems', $this->request->data = $invoiceItems);
 	}
 
+/**
+ * View method
+ * 
+ * @param uuid || string (id or name)
+ * @return array
+ */
 	public function view($id = null) {
-		if (!$id) {
+		$id = Zuha::is_uuid($id) ? $id : $this->InvoiceItem->field('id', array('InvoiceItem.name' => $id)); // id or name
+				
+		$this->InvoiceItem->id = $id;
+		if (!$this->InvoiceItem->exists()) {
 			$this->Session->setFlash(__('Invalid invoice item', true));
 			$this->redirect(array('action' => 'index'));
 		}
-		$this->set('invoiceItem', $this->InvoiceItem->read(null, $id));
+		$this->set('invoiceItem', $this->request->data = $this->InvoiceItem->read(null, $id));
+		return $this->request->data;
+	}
+
+	public function sort() {
+		// Configure::write('debug', 0);
+        if (!empty($this->request->data['order'][1])) {
+    		$i = 0;
+    		foreach ($this->request->data['order'] as $item) {
+    			if (!empty($item['item_id'])) {
+    				$data['InvoiceItem']['id'] = $item['item_id'];
+    				$data['InvoiceItem']['parent_id'] = $item['parent_id'];
+    				if ($this->InvoiceItem->save($data, array('validate' => false))) {
+        			    $output[] = $data;   
+    				} else {
+                        $output['brokeOn'] = $data;
+        			    break;
+    				}
+    			}
+    			$i++;
+    		}
+            $this->set(compact('output'));
+        }
+		$this->render(false);
 	}
 
 	public function add() {
@@ -28,9 +61,8 @@ class InvoiceItemsController extends InvoicesAppController {
 				$this->Session->setFlash(__('The invoice item could not be saved. Please, try again.', true));
 			}
 		}
-		$invoices = $this->InvoiceItem->Invoice->find('list');
-		$products = $this->InvoiceItem->Product->find('list');
-		$this->set(compact('invoices', 'products'));
+		$parents = $this->InvoiceItem->generateTreeList();
+		$this->set(compact('parents'));
 	}
 
 	public function edit($id = null) {
@@ -67,4 +99,3 @@ class InvoiceItemsController extends InvoicesAppController {
 		$this->redirect(array('action' => 'index'));
 	}
 }
-?>

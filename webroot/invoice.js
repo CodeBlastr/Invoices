@@ -1,6 +1,7 @@
 // JavaScript Document
 
 $(document).ready(function() {
+					
 	// reusable
 	$(".reusableSelect").change(function() {
 	  var idNumber = $(this).attr('id');
@@ -19,6 +20,34 @@ $(document).ready(function() {
 	// handle the calculations
 	$('table').on('keyup', 'input', function(e) {
 		calculateInvoice();
+	});
+	calculateInvoice(); // used on the edit page to calculate upon load 
+	
+	// handle the form iteractivity 
+	$('#InvoiceAddForm, #InvoiceEditForm').on('change', '.combobox', function() {
+		var that = this;
+		if($(this).val() == '+') {
+			var id = $(this).attr('id');
+			var name = $(this).attr('name');
+			var clas = $(this).attr('class');
+			$(this).replaceWith('<input name="' + name + '" id="' + id + '" type="text" class="' + clas + '" />');
+		} else {
+			// get the invoice item template and fill the sibling inputs
+			$.ajax({
+				url: '/invoices/invoice_items/view/' + $(this).val() + '.json',
+			}).done(function( data ) {
+				if (data) {
+					var description = data.invoiceItem.InvoiceItem.description;
+					var unitCost = data.invoiceItem.InvoiceItem.unit_cost;
+					var quantity = 1;
+					$(that).closest('tr').find('input[name*="description"]').first().val(description);
+					$(that).closest('tr').find('input[name*="unit_cost"]').first().val(unitCost);
+					$(that).closest('tr').find('input[name*="quantity"]').first().val(quantity);
+					clone(that); // this is a call to the form.utility plugin
+					calculateInvoice(); 
+				}
+			});
+		}
 	});
 });
 

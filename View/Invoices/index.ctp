@@ -21,7 +21,6 @@ $this->set('context_crumbs', array('crumbs' => array(
 	$this->Html->link(__('Admin Dashboard'), '/admin'),
 	'Invoices',
 )));
-
 // set the contextual menu items
 $this->set('context_menu', array('menus' => array(
 	array(

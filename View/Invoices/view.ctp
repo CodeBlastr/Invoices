@@ -135,6 +135,12 @@
   <!-- /info-block end -->
 </div>
 <?php
+// set the contextual breadcrumb items
+$this->set('context_crumbs', array('crumbs' => array(
+	$this->Html->link(__('Admin Dashboard'), '/admin'),
+	$this->Html->link(__('Invoices'), '/admin/invoices'),
+	'Invoice ' . $invoice['Invoice']['name'],
+)));
 // set the contextual menu items
 $this->set('context_menu', array('menus' => array( array(
 			'heading' => 'Invoice',
@@ -163,6 +169,6 @@ $this->set('context_menu', array('menus' => array( array(
 					$invoice['Invoice']['id']
 				), null, __('Are you sure you want to delete %s', strip_tags($invoice['Invoice']['name']))),
 			)
-		), )));
+		))));
 ?>
 <?php $this->set('page_title_for_layout', $invoice['Invoice']['name']); ?>

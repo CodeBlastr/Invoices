@@ -14,53 +14,31 @@ class AppInvoicesController extends InvoicesAppController {
 
 	public $order = array('number', 'due_date');
 
-	public function index($status = array('unpaid', 'partpaid')) {
-		$this->paginate = array(
-			'conditions' => array(
-				'Invoice.status' => $status,
-				),
-			'fields' => array(
-				'id',
-				'name',
-				'status',
-				'total',
-				'balance',
-				'due_date',
-				),
-			'order' => array(
-				'created DESC',
-				),
-			);
+	public function index() {
+		$this->paginate['order'] = array('created' => 'DESC');
 		$this->set('invoices', $this->paginate());
-		
-		$this->set('displayName', 'name');
-		$this->set('displayDescription', ''); 
-		$pageActions = array(array(
-			'linkText' => 'Add',
-			'linkUrl' => array(
-				'plugin' => 'invoices',
-				'controller' => 'invoices',
-				'action' => 'add',
-				),
-			),array(
-			'linkText' => 'Paid',
-			'linkUrl' => array(
-				'plugin' => 'invoices',
-				'controller' => 'invoices',
-				'action' => 'index',
-				'paid',
-				),
-			),array(
-			'linkText' => 'Generate',
-			'linkUrl' => array(
-				'plugin' => 'invoices',
-				'controller' => 'invoices',
-				'action' => 'generate',
-				),
-			));
-		$this->set(compact('pageActions')); 
 	}
 
+
+	public function owned() {
+		$this->paginate['conditions']['Invoice.owner_id'] = $this->Session->read('Auth.User.id');
+		$this->view = 'index';
+		return $this->index();
+	}
+
+
+	public function received() {
+		$this->paginate['conditions']['Invoice.recipient_id'] = $this->Session->read('Auth.User.id');
+		$this->view = 'index';
+		return $this->index();
+	}
+
+/**
+ * View method
+ * 
+ * @param uuid
+ * @return array
+ */
 	public function view($id = null) {
 		$this->Invoice->id = $id;
 		if (!$this->Invoice->exists()) {
@@ -75,17 +53,20 @@ class AppInvoicesController extends InvoicesAppController {
 					'order' => 'created'
 					),
 				'InvoiceItem',
+				'Recipient',
+				'Owner'
 				),
 			));
 		
-		$this->set(compact('invoice', 'trackedHoursSum', 'percentComplete'));
+		$this->set('invoice', $this->request->data = $invoice);
 		$this->set('title_for_layout',  strip_tags($invoice['Invoice']['name']));
+		$this->set('page_title_for_layout',  strip_tags($invoice['Invoice']['name']));
 	}
 
 	public function add() {
 		if ($this->request->is('post')) {
 			try {
-				$this->Invoice->save($this->request->data);
+				$this->Invoice->saveAll($this->request->data);
 				$this->Session->setFlash(__('The invoice has been saved', true));
 				$this->redirect(array('action' => 'view', $this->Invoice->id));
 			} catch(Exception $e) {
@@ -97,6 +78,7 @@ class AppInvoicesController extends InvoicesAppController {
 		$dueDate = date('Y-m-d');
 		$defaultIntroduction = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
 		$defaultConclusion = defined('__INVOICES_DEFAULT_CONCLUSION') ? __INVOICES_DEFAULT_CONCLUSION : '';
+		$this->set('invoiceItems', $invoiceItems = $this->Invoice->InvoiceItem->generateTreeList(array('InvoiceItem.is_reusable' => 1), '{n}.InvoiceItem.name', null, '-- '));
 		$this->set(compact('contacts', 'invoiceNumber', 'dueDate', 'defaultIntroduction', 'defaultConclusion'));
 	}
 
@@ -107,7 +89,7 @@ class AppInvoicesController extends InvoicesAppController {
 		}
 		if (!empty($this->request->data)) {
 			try {
-				$this->Invoice->save($this->request->data);
+				$this->Invoice->saveAll($this->request->data);
 				$this->Session->setFlash(__('The invoice has been saved', true));
 				$this->redirect(array('action' => 'view', $this->Invoice->id));
 			} catch(Exception $e) {
@@ -125,11 +107,12 @@ class AppInvoicesController extends InvoicesAppController {
 					),
 				'InvoiceItem',
 				),
-			));
+			));		
 		$this->set( 'reusableItems', $this->Invoice->InvoiceItem->find('all', array('conditions' => array('is_reusable'=>1))) );
 		$this->request->data['Invoice']['balance'] = !empty($this->request->data['Invoice']['balance']) ? ZuhaInflector::pricify($this->request->data['Invoice']['balance']) : null;
 		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
 		$this->set(compact('contacts'));
+		$this->set('invoiceItems', $invoiceItems = $this->Invoice->InvoiceItem->generateTreeList(array('InvoiceItem.is_reusable' => 1), '{n}.InvoiceItem.name', null, '-- '));
 		$this->set('page_title_for_layout', __('Edit %s', $this->request->data['Invoice']['name']));
 	}
 

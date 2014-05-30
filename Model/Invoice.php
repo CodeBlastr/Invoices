@@ -1,7 +1,10 @@
 <?php
 class Invoice extends AppModel {
+
 	public $name = 'Invoice';
+
 	public $displayField = 'name';
+
 	public $validate = array(
 		'invoice_status' => array(
 			'notempty' => array(
@@ -11,18 +14,20 @@ class Invoice extends AppModel {
 				//'required' => false,
 				//'last' => false, // Stop validation after this rule
 				//'on' => 'create', // Limit validation to 'create' or 'update' operations
-			),
-		),
-	);
+				)
+			)
+		);
+        
+ /**
+  * Acts as
+  * 
+  * @var array
+  */
+    public $actsAs = array(
+     	'Metable',
+		);
 	
 	public $belongsTo = array(
-		'Project' => array(
-			'className' => 'Projects.Project',
-			'foreignKey' => 'project_id',
-			'conditions' => '',
-			'fields' => '',
-			'order' => ''
-		),
 		'Contact' => array(
 			'className' => 'Contacts.Contact',
 			'foreignKey' => 'contact_id',
@@ -37,6 +42,20 @@ class Invoice extends AppModel {
 			'fields' => '',
 			'order' => ''
 		),
+		'Owner' => array(
+			'className' => 'Users.User',
+			'foreignKey' => 'owner_id',
+			'conditions' => '',
+			'fields' => '',
+			'order' => ''
+		),
+		'Recipient' => array(
+			'className' => 'Users.User',
+			'foreignKey' => 'recipient_id',
+			'conditions' => '',
+			'fields' => '',
+			'order' => ''
+		)
 	);
 
 	public $hasMany = array(
@@ -69,74 +88,52 @@ class Invoice extends AppModel {
 	);
 	
 	
-	public function add($data) {
-		$data = $this->cleanData($data);
-		
-		if ($this->saveAll($data)) {
-			return true;
-		} else {
-			$error = 'Error : ';
-			foreach ($this->invalidFields() as $models) {
-				if (is_array($models)) {
-					foreach ($models as $err) {
-						$error .= $err . ', ';
-					}
-				} else {
-					$error .= $models;
-				}
-			}
-			throw new Exception($error);
+	public function __construct($id = false, $table = null, $ds = null) {
+    	parent::__construct($id, $table, $ds);
+		if (CakePlugin::loaded('Projects')) {
+			$this->belongsTo['Project'] = array(
+				'className' => 'Projects.Project',
+				'foreignKey' => 'project_id',
+				'conditions' => '',
+				'fields' => '',
+				'order' => ''
+				);
 		}
+	}
+	
+	
+	public function saveAll($data = null, $options = array()) {
+		$data = $this->cleanData($data);
+		return parent::saveAll($data, $options);
+	}
+	
+	public function add($data) {
+		return $this->saveAll($data);
+		// $data = $this->cleanData($data);
+// 		
+		// if ($this->saveAll($data)) {
+			// return true;
+		// } else {
+			// $error = 'Error : ';
+			// foreach ($this->invalidFields() as $models) {
+				// if (is_array($models)) {
+					// foreach ($models as $err) {
+						// $error .= $err . ', ';
+					// }
+				// } else {
+					// $error .= $models;
+				// }
+			// }
+			// throw new Exception($error);
+		// }
 	}
 	
 	
 	public function cleanData($data) {
 		
-		// clear Invoice Item if its empty
-		$i = 0;
-		if (!empty($data['InvoiceItem'])) {
-			$data['InvoiceItem'] = array_values($data['InvoiceItem']);  
-			foreach ($data['InvoiceItem'] as $invoiceItem) {
-				if (empty($invoiceItem['quantity'])) {
-					unset($data['InvoiceItem'][$i]);
-				}
-				$i++;
-			}
-		}
+		$data = $this->_cleanItems($data);
 		
-		if (empty($data['InvoiceItem'])) {
-			unset($data['InvoiceItem']);
-		}
-		
-		// clear Invoice time if its empty
-		$i = 0;
-		if (!empty($data['InvoiceTime'])) {
-			$data['InvoiceTime'] = array_values($data['InvoiceTime']); 
-			foreach ($data['InvoiceTime'] as $invoiceTime) {
-				if (empty($invoiceTime['hours'])) {
-					unset($data['InvoiceTime'][$i]);
-				}
-				$i++;
-			}
-		}
-		
-		if (empty($data['InvoiceTime'])) {
-			unset($data['InvoiceTime']);
-		}
-		
-//		// Duplicate and format Reusable Items.
-//		// We are making a template from the Item they submitted as reusable.
-//		if ( !empty($data['InvoiceItem']) ) {
-//			$i = 0;
-//			foreach ($data['InvoiceItem'] as $invoiceItem) {
-//				if ( $invoiceItem['is_reusable'] ) {
-//					$reusableInvoiceItem = $invoiceItem;
-//					$data['InvoiceItem'][] = $reusableInvoiceItem; // this one will be the template
-//					$data['InvoiceItem'][$i]['is_reusable'] = 0;
-//				}
-//				++$i;
-//			}
-//		}
+		$data = $this->_calculateTotal($data);
 		
 		// make a name for the invoice
 		if (empty($data['Invoice']['name']) && !empty($data['Invoice']['contact_id'])) {
@@ -144,16 +141,23 @@ class Invoice extends AppModel {
 			$data['Invoice']['name'] = !empty($contact['Contact']['name']) ? $contact['Contact']['name'] . ' ' . $data['Invoice']['number'] : $data['Invoice']['number'];
 		}
 		
+		// make a name for the invoice
+		if (empty($data[$this->alias]['name']) && !empty($data[$this->alias]['number'])) {
+			$data[$this->alias]['name'] = $data[$this->alias]['number'];
+		}
+		
 		// auto set the invoice status
-		if (empty($data['Invoice']['balance']) && intval($data['Invoice']['balance']) === 0) {
-			$data['Invoice']['status'] = 'paid';
-		} elseif ($data['Invoice']['balance'] == $data['Invoice']['total']) {
-			$data['Invoice']['status'] = 'unpaid';
-		} elseif (empty($data['Invoice']['balance']) && !empty($data['Invoice']['total'])){
-			$data['Invoice']['balance'] = $data['Invoice']['total'];
-			$data['Invoice']['status'] = 'unpaid';
-		} elseif ($data['Invoice']['balance'] < $data['Invoice']['total']) {
-			$data['Invoice']['status'] = 'partpaid';
+		if (empty($data['Invoice']['status'])) {
+			if (empty($data['Invoice']['balance']) && intval($data['Invoice']['balance']) === 0) {
+				$data['Invoice']['status'] = 'paid';
+			} elseif ($data['Invoice']['balance'] == $data['Invoice']['total']) {
+				$data['Invoice']['status'] = 'unpaid';
+			} elseif (empty($data['Invoice']['balance']) && !empty($data['Invoice']['total'])){
+				$data['Invoice']['balance'] = $data['Invoice']['total'];
+				$data['Invoice']['status'] = 'unpaid';
+			} elseif ($data['Invoice']['balance'] < $data['Invoice']['total']) {
+				$data['Invoice']['status'] = 'partpaid';
+			}
 		}
 		
 		
@@ -172,6 +176,68 @@ class Invoice extends AppModel {
 			$this->InvoiceTime->deleteAll(array('InvoiceTime.id' => $currentTimes));
 		}
 		
+		return $data;
+	}
+
+	public function _calculateTotal($data = array()) {
+		if (empty($data[$this->alias]['total'])) {
+			$data[$this->alias]['total'] = 0;
+			// add up invoice items
+			if (!empty($data['InvoiceItem'])) {
+				$data['InvoiceItem'] = array_values($data['InvoiceItem']);  
+				for ($i = 0; $i < count($data['InvoiceItem']); $i++) {
+					if (!empty($data['InvoiceItem'][$i]['quantity']) && !empty($data['InvoiceItem'][$i]['unit_cost'])) {
+						$subTotal = $data['InvoiceItem'][$i]['quantity'] * $data['InvoiceItem'][$i]['unit_cost'];
+						$data[$this->alias]['total'] = $data[$this->alias]['total'] + $subTotal;
+					}
+				}
+			}
+			// add up invoice items
+			if (!empty($data['InvoiceTime'])) {
+				$data['InvoiceTime'] = array_values($data['InvoiceTime']);  
+				for ($i = 0; $i < count($data['InvoiceTime']); $i++) {
+					if (!empty($data['InvoiceTime'][$i]['hours']) && !empty($data['InvoiceTime'][$i]['rate'])) {
+						$subTotal = $data['InvoiceTime'][$i]['hours'] * $data['InvoiceTime'][$i]['rate'];
+						$data[$this->alias]['total'] = $data[$this->alias]['total'] + $subTotal;
+					}
+				}
+			}
+		}
+		if (empty($data[$this->alias]['balance'])) {
+			$data[$this->alias]['balance'] = $data[$this->alias]['total'];
+		}
+		return $data;
+	}
+
+	public function _cleanItems($data = array()) {
+		// clear Invoice Item if its empty
+		$i = 0;
+		if (!empty($data['InvoiceItem'])) {
+			$data['InvoiceItem'] = array_values($data['InvoiceItem']);  
+			foreach ($data['InvoiceItem'] as $invoiceItem) {
+				if (empty($invoiceItem['quantity'])) {
+					unset($data['InvoiceItem'][$i]);
+				}
+				$i++;
+			}
+		}
+		if (empty($data['InvoiceItem'])) {
+			unset($data['InvoiceItem']);
+		}
+		// clear Invoice time if its empty
+		$i = 0;
+		if (!empty($data['InvoiceTime'])) {
+			$data['InvoiceTime'] = array_values($data['InvoiceTime']); 
+			foreach ($data['InvoiceTime'] as $invoiceTime) {
+				if (empty($invoiceTime['hours'])) {
+					unset($data['InvoiceTime'][$i]);
+				}
+				$i++;
+			}
+		}
+		if (empty($data['InvoiceTime'])) {
+			unset($data['InvoiceTime']);
+		}
 		return $data;
 	}
 
@@ -230,30 +296,37 @@ class Invoice extends AppModel {
  */
 	public function generateTimeBasedInvoice($requestData) {
 		$data = null;
-		$projectIds = array_values(array_filter($requestData['Invoice']['project_id'])); //reindex & filter zero values
-		$project = $this->Project->find('first', array('conditions' => array('Project.id' => $projectIds[0])));
-		$conditions['TimesheetTime.project_id'] = $projectIds;
-		$conditions['TimesheetTime.started_on >='] = !empty($requestData['Invoice']['start_date']) ? $requestData['Invoice']['start_date'] : '0000-00-00 00:00:00';
-		$conditions['TimesheetTime.started_on <='] = !empty($requestData['Invoice']['end_date']) ? date('Y-m-d 99:99:99', strtotime($requestData['Invoice']['end_date'])) : '9999-99-99 99:99:99';
-		$times = $this->Project->TimesheetTime->find('all', array(
-			'conditions' => $conditions,
-			'contain' => array(
-				'Task',
-				'ProjectIssue',
-			),
-			'order' => array(
-				'TimesheetTime.created DESC',
-			),
-		));
+		
+		$data['Invoice']['name'] = $this->generateInvoiceNumber();
+		
+		if (CakePlugin::loaded('Projects')) {
+			// this should be moved elsewhere 5/27/2014 RK
+			$projectIds = array_values(array_filter($requestData['Invoice']['project_id'])); //reindex & filter zero values
+			$project = $this->Project->find('first', array('conditions' => array('Project.id' => $projectIds[0])));
+			$conditions['TimesheetTime.project_id'] = $projectIds;
 
-		$data['Invoice']['name'] = strip_tags($project['Project']['name']) . ' ' . $this->generateInvoiceNumber();
+			$conditions['TimesheetTime.started_on >='] = !empty($requestData['Invoice']['start_date']) ? $requestData['Invoice']['start_date'] : '0000-00-00 00:00:00';
+			$conditions['TimesheetTime.started_on <='] = !empty($requestData['Invoice']['end_date']) ? date('Y-m-d 99:99:99', strtotime($requestData['Invoice']['end_date'])) : '9999-99-99 99:99:99';
+			$times = $this->Project->TimesheetTime->find('all', array(
+				'conditions' => $conditions,
+				'contain' => array(
+					'Task',
+					'ProjectIssue',
+				),
+				'order' => array(
+					'TimesheetTime.created DESC',
+				),
+			));
+			$data['Invoice']['name'] = strip_tags($project['Project']['name']) . ' ' . $this->generateInvoiceNumber();
+			$data['Invoice']['project_id'] = $projectIds[0]; // didn't think ahead for having an invoice relate to multiple projects (but I really don't want to create another new habtm db table in order to just relate invoices to projects)
+		}
+
 		$data['Invoice']['number'] = $this->generateInvoiceNumber();
 		$data['Invoice']['status'] = 'unpaid';
 		$data['Invoice']['introduction'] = defined('__INVOICES_DEFAULT_INTRODUCTION') ? __INVOICES_DEFAULT_INTRODUCTION : '';
 		$data['Invoice']['conclusion'] = defined('__INVOICES_DEFAULT_CONCLUSION') ? __INVOICES_DEFAULT_CONCLUSION : '';
 		$data['Invoice']['due_date'] = date('Y-m-d');
 		$data['Invoice']['contact_id'] = $requestData['Invoice']['contact_id'];
-		$data['Invoice']['project_id'] = $projectIds[0]; // didn't think ahead for having an invoice relate to multiple projects (but I really don't want to create another new habtm db table in order to just relate invoices to projects)
 		$rate = defined('__INVOICES_DEFAULT_RATE') ? __INVOICES_DEFAULT_RATE : '0';
 		$rate = !empty($requestData['Invoice']['rate']) ? $requestData['Invoice']['rate'] : '0'; // over write default if provided
 

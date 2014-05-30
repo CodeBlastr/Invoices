@@ -71,4 +71,3 @@ class InvoiceTimesController extends InvoicesAppController {
 		$this->redirect(array('action' => 'index'));
 	}
 }
-?>
