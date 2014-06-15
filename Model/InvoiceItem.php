@@ -14,7 +14,10 @@ class InvoiceItem extends AppModel {
   * 
   * @var array
   */
-    public $actsAs = array('Tree');
+    public $actsAs = array(
+    	'Tree',
+     	'Metable'
+		);
 	
 	public $belongsTo = array(
 		'Invoice' => array(

@@ -2,6 +2,13 @@
 class Invoice extends AppModel {
 
 	public $name = 'Invoice';
+	
+/**
+ * var itemData
+ * 
+ * Used when saveAll on the Invoice model is invoked
+ */
+	public $itemData = array();
 
 	public $displayField = 'name';
 
@@ -101,6 +108,23 @@ class Invoice extends AppModel {
 		}
 	}
 	
+	public function afterSave($created, $options = array()) {
+		if (!empty($this->itemData) && !empty($this->id)) {
+			$invoiceId = $this->id;
+			for($i=0; $i < count($this->itemData['InvoiceItem']); $i++) {
+				$itemData[$i]['InvoiceItem'] = $this->itemData['InvoiceItem'][$i];
+				$itemData[$i]['InvoiceItem']['invoice_id'] = $invoiceId;
+			}
+			$this->InvoiceItem->create();
+			if ($this->InvoiceItem->saveAll($itemData)) {
+				return true;
+			} else {
+				throw new Exception(__('Invoice Item Save Failed')); 
+			}
+		}
+		return parent::afterSave($created, $options);
+	}
+	
 	
 	public function saveAll($data = null, $options = array()) {
 		$data = $this->cleanData($data);
@@ -176,6 +200,10 @@ class Invoice extends AppModel {
 			$this->InvoiceTime->deleteAll(array('InvoiceTime.id' => $currentTimes));
 		}
 		
+		// we need to manually save InvoiceItem's, because its Metable
+		$this->itemData['InvoiceItem'] = $data['InvoiceItem'];
+		unset($data['InvoiceItem']); 
+		
 		return $data;
 	}
 
@@ -209,6 +237,12 @@ class Invoice extends AppModel {
 		return $data;
 	}
 
+/**
+ * clean Items method
+ * 
+ * @param array
+ * @return array
+ */
 	public function _cleanItems($data = array()) {
 		// clear Invoice Item if its empty
 		$i = 0;

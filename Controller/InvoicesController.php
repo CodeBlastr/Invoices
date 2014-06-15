@@ -52,11 +52,11 @@ class AppInvoicesController extends InvoicesAppController {
 				'InvoiceTime' => array(
 					'order' => 'created'
 					),
-				'InvoiceItem',
 				'Recipient',
 				'Owner'
 				),
 			));
+		$invoice = array_merge($invoice, ZuhaSet::manyize($this->Invoice->InvoiceItem->find('all', array('conditions' => array('InvoiceItem.invoice_id' => $id)))));
 		
 		$this->set('invoice', $this->request->data = $invoice);
 		$this->set('title_for_layout',  strip_tags($invoice['Invoice']['name']));
@@ -97,7 +97,7 @@ class AppInvoicesController extends InvoicesAppController {
 			}
 		}
 
-		$this->request->data = $this->Invoice->find('first', array(
+		$invoice = $this->Invoice->find('first', array(
 			'conditions' => array(
 				'Invoice.id' => $id
 				),
@@ -105,9 +105,9 @@ class AppInvoicesController extends InvoicesAppController {
 				'InvoiceTime' => array(
 					'order' => 'created'
 					),
-				'InvoiceItem',
 				),
-			));		
+			));
+		$this->request->data = array_merge($invoice, ZuhaSet::manyize($this->Invoice->InvoiceItem->find('all', array('conditions' => array('InvoiceItem.invoice_id' => $id)))));
 		$this->set( 'reusableItems', $this->Invoice->InvoiceItem->find('all', array('conditions' => array('is_reusable'=>1))) );
 		$this->request->data['Invoice']['balance'] = !empty($this->request->data['Invoice']['balance']) ? ZuhaInflector::pricify($this->request->data['Invoice']['balance']) : null;
 		$contacts = $this->Invoice->Contact->findCompaniesWithRegisteredUsers('list');
