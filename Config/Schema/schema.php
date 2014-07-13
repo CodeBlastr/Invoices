@@ -63,7 +63,7 @@ class InvoicesSchema extends CakeSchema {
 		'introduction' => array('type' => 'text', 'null' => true, 'default' => NULL, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'conclusion' => array('type' => 'text', 'null' => true, 'default' => NULL, 'collate' => 'utf8_general_ci', 'charset' => 'utf8'),
 		'due_date' => array('type' => 'date', 'null' => true, 'default' => NULL),
-		'≈å' => array('type' => 'datetime', 'null' => false, 'default' => NULL),
+		'date' => array('type' => 'datetime', 'null' => false, 'default' => NULL),
 		'sent' => array('type' => 'datetime', 'null' => false, 'default' => NULL),
 		'total' => array('type' => 'float', 'null' => true, 'default' => NULL),
 		'balance' => array('type' => 'float', 'null' => true, 'default' => NULL),
